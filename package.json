@@ -20,7 +20,12 @@
     "docker:logs": "cd apps/backend && docker-compose logs -f"
   },
   "devDependencies": {
+    "prettier": "^3.7.4",
     "turbo": "^2.7.2"
+  },
+  "overrides": {
+    "inflight": "npm:@isaacs/inflight@^1.0.6",
+    "glob": "^10.3.10"
   },
   "engines": {
     "node": ">=18.0.0"
