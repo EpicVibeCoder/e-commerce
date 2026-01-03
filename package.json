@@ -1,0 +1,29 @@
+{
+  "name": "e-commerce-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean",
+    "dev:backend": "turbo run dev --filter=backend",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:mobile": "turbo run dev --filter=mobile",
+    "docker:up": "cd apps/backend && docker-compose up -d",
+    "docker:down": "cd apps/backend && docker-compose down",
+    "docker:logs": "cd apps/backend && docker-compose logs -f"
+  },
+  "devDependencies": {
+    "turbo": "^2.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "npm@10.0.0"
+}

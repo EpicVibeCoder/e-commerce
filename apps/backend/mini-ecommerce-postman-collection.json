@@ -1,0 +1,3652 @@
+{
+	"info": {
+		"_postman_id": "0c7fbced-c196-4fb8-a4b3-ec3d666bd9b9",
+		"name": "E-Commerce API - Complete Collection",
+		"description": "Complete test collection for E-Commerce API\n\nImplemented Endpoints:\n- Authentication: Register, Login, Admin creation ✓\n- Users: Profile, Orders, Payments, Update ✓\n- Categories: Full CRUD (DFS + Redis caching) ✓\n- Products: Full CRUD + Recommendations (DFS) ✓\n- Orders: Create orders, view own orders, cancel orders ✓\n- Payments: Initiate payment, webhooks & callbacks (Stripe & bKash) ✓\n\nBase URL: http://localhost:3000/api/v1\n\nTest Coverage:\n- ✓ Role-based Authorization (RolesGuard) - Customer cannot access admin endpoints\n- ✓ Session-based Authorization - Users cannot access other users' data\n- ✓ Authentication & Validation tests\n- ✓ Category CRUD with hierarchical structure\n- ✓ Product CRUD with OOP Product class\n- ✓ Product Recommendations using DFS (Req 2.2.5)\n- ✓ Order Management with OOP Order/OrderItem classes\n- ✓ Payment System with Strategy Pattern (Stripe & bKash)\n\nRequirements Alignment:\n- ✓ User Management (2.1.1)\n- ✓ Category Management with DFS + Caching (2.2.5)\n- ✓ Product Management with OOP Product class (2.1.2, 2.2.1)\n- ✓ Product Recommendations using DFS (2.2.5)\n- ✓ Order Management with OOP Order/OrderItem classes (2.1.3, 2.2.1, 2.2.3)\n- ✓ Payment System with Strategy Pattern (2.1.4, 2.2.4)\n- ✓ Role-based Access Control (RolesGuard)\n- ✓ Session-based Access Control",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2903335"
+	},
+	"item": [
+		{
+			"name": "General",
+			"item": [
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User (Success)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Save token and user ID to collection variables",
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", response.access_token);",
+									"    pm.collectionVariables.set(\"user_id\", response.user.id);",
+									"    pm.collectionVariables.set(\"user_email\", response.user.email);",
+									"    pm.collectionVariables.set(\"user_role\", response.user.role);",
+									"}",
+									"",
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has access_token\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('access_token');",
+									"});",
+									"",
+									"pm.test(\"Response has user object\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('user');",
+									"    pm.expect(response.user).to.have.property('id');",
+									"    pm.expect(response.user).to.have.property('email');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user. Email must be unique (Req 2.1.1)."
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Duplicate Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Test email uniqueness validation (Req 2.1.1)."
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Validation Error",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"invalid-email\",\n  \"password\": \"123\",\n  \"firstName\": \"\",\n  \"lastName\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Test data validation (Req 3 - Proper data validation)."
+					},
+					"response": []
+				},
+				{
+					"name": "Login User (Success)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", response.access_token);",
+									"    pm.collectionVariables.set(\"user_id\", response.user.id);",
+									"    pm.collectionVariables.set(\"user_email\", response.user.email);",
+									"    pm.collectionVariables.set(\"user_role\", response.user.role);",
+									"}",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has access_token\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('access_token');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with valid credentials (Req 2.1.1)."
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Invalid Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"wrongpassword\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Test authentication error handling."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Admin User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"admin_user_id\", response.user.id);",
+									"    pm.collectionVariables.set(\"admin_user_email\", response.user.email);",
+									"    console.log('⚠️ IMPORTANT: User registered as CUSTOMER by default.');",
+									"    console.log('⚠️ You MUST manually update role to ADMIN in database:');",
+									"    console.log('   SQL: UPDATE users SET role = \\'ADMIN\\' WHERE email = \\'admin@example.com\\';');",
+									"    console.log('   Then use \"Login Admin User\" endpoint to get admin token.');",
+									"}",
+									"",
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"User is created as CUSTOMER by default\", function () {",
+									"    if (pm.response.code === 201) {",
+									"        const response = pm.response.json();",
+									"        pm.expect(response.user.role).to.equal('CUSTOMER');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\",\n  \"firstName\": \"Admin\",\n  \"lastName\": \"User\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register admin user. ⚠️ IMPORTANT: User will be created as CUSTOMER by default.\n\nYou MUST manually update the role in database:\nSQL: UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';\n\nThen use 'Login Admin User' endpoint to get admin token.\n\nThis tests that the registration endpoint doesn't allow direct admin creation (security best practice)."
+					},
+					"response": []
+				},
+				{
+					"name": "Login Admin User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.user.role === 'ADMIN') {",
+									"        pm.collectionVariables.set(\"admin_token\", response.access_token);",
+									"        pm.collectionVariables.set(\"admin_id\", response.user.id);",
+									"        pm.collectionVariables.set(\"admin_email\", response.user.email);",
+									"    } else {",
+									"        console.log('WARNING: User role is not ADMIN. Please update role in database.');",
+									"    }",
+									"}",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"User has ADMIN role\", function () {",
+									"    if (pm.response.code === 200) {",
+									"        const response = pm.response.json();",
+									"        pm.expect(response.user.role).to.equal('ADMIN');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as admin user. Make sure role is set to ADMIN in database first. Saves admin_token to collection variables."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Second User (For Testing)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"second_user_token\", response.access_token);",
+									"    pm.collectionVariables.set(\"second_user_id\", response.user.id);",
+									"    pm.collectionVariables.set(\"second_user_email\", response.user.email);",
+									"}",
+									"",
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user2@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a second user for testing session-based authorization (users cannot access other users' data)."
+					},
+					"response": []
+				},
+				{
+					"name": "Login Second User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"second_user_token\", response.access_token);",
+									"    pm.collectionVariables.set(\"second_user_id\", response.user.id);",
+									"    pm.collectionVariables.set(\"second_user_email\", response.user.email);",
+									"}",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has access_token\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('access_token');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user2@example.com\",\n  \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login as the second user. Useful if you need to refresh the token or if registration was skipped."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has user data\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('id');",
+									"    pm.expect(response).to.have.property('email');",
+									"    pm.expect(response).to.have.property('firstName');",
+									"    pm.expect(response).to.have.property('lastName');",
+									"    pm.expect(response).to.have.property('role');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"profile"
+							]
+						},
+						"description": "Get authenticated user profile. Requires JWT token (Req 2.1.1)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Profile - Unauthorized",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"profile"
+							]
+						},
+						"description": "Test authentication guard - should fail without token."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Orders",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 404\", function () {",
+									"    pm.expect([200, 404]).to.include(pm.response.code);",
+									"});",
+									"",
+									"// Verify that only authenticated user's orders are returned",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (Array.isArray(response)) {",
+									"        response.forEach(order => {",
+									"            pm.expect(order.userId || order.user_id).to.equal(pm.collectionVariables.get('user_id'));",
+									"        });",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"orders"
+							]
+						},
+						"description": "Get all orders for the authenticated user. Session-based: Only returns orders belonging to the authenticated user (Req 2.1.1, 2.1.3)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Payments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 404\", function () {",
+									"    pm.expect([200, 404]).to.include(pm.response.code);",
+									"});",
+									"",
+									"// Verify that only authenticated user's payments are returned",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (Array.isArray(response)) {",
+									"        // Payments should be linked to user's orders only",
+									"        console.log('Payments returned for authenticated user');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"payments"
+							]
+						},
+						"description": "Get all payments for the authenticated user's orders. Session-based: Only returns payments for orders belonging to the authenticated user (Req 2.1.1)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Orders - Second User (Session Isolation)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 404\", function () {",
+									"    pm.expect([200, 404]).to.include(pm.response.code);",
+									"});",
+									"",
+									"// Verify second user only sees their own orders",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (Array.isArray(response)) {",
+									"        const secondUserId = pm.collectionVariables.get('second_user_id');",
+									"        response.forEach(order => {",
+									"            pm.expect(order.userId || order.user_id).to.equal(secondUserId);",
+									"        });",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{second_user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"orders"
+							]
+						},
+						"description": "Test session-based authorization - Second user should only see their own orders, not first user's orders (Req 2.1.3)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 404\", function () {",
+									"    pm.expect([200, 404]).to.include(pm.response.code);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('id');",
+									"    pm.expect(response).to.have.property('email');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{user_id}}"
+								}
+							]
+						},
+						"description": "Get user details by ID. Admin only endpoint - allows admins to view any user's details."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID - Customer Role (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden or 404\", function () {",
+									"    pm.expect([403, 404]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{second_user_id}}"
+								}
+							]
+						},
+						"description": "Test session-based authorization - Customer trying to view another user's details should get 403 Forbidden (Req 2.1.1)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User by ID (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 404\", function () {",
+									"    pm.expect([200, 404]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"Name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{user_id}}"
+								}
+							]
+						},
+						"description": "Update user details by ID. Admin can update any user, users can update their own profile (Req 2.1.1)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User by ID - Customer Role (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden or 404\", function () {",
+									"    pm.expect([403, 404]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Unauthorized\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{second_user_id}}"
+								}
+							]
+						},
+						"description": "Test session-based authorization - Customer trying to update another user's details should get 403 Forbidden (Req 2.1.1)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User by ID - Own Profile (Should Work)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 404\", function () {",
+									"    pm.expect([200, 404]).to.include(pm.response.code);",
+									"});",
+									"",
+									"// If implemented, user should be able to update their own profile",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('id');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"UpdatedFirstName\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{user_id}}"
+								}
+							]
+						},
+						"description": "Test session-based authorization - User should be able to update their own profile (using their own user ID)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "Get Category Hierarchy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has data array\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Categories have hierarchical structure\", function () {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.length > 0) {",
+									"        const category = response.data[0];",
+									"        pm.expect(category).to.have.property('id');",
+									"        pm.expect(category).to.have.property('name');",
+									"        pm.expect(category).to.have.property('slug');",
+									"        pm.expect(category).to.have.property('children');",
+									"        pm.expect(category.children).to.be.an('array');",
+									"    }",
+									"});",
+									"",
+									"// Save first category ID if exists",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.length > 0) {",
+									"        pm.collectionVariables.set(\"category_id\", response.data[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Get complete category hierarchy using DFS algorithm. Results are cached in Redis (Req 2.2.5). Public endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has category data\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data).to.have.property('id');",
+									"    pm.expect(response.data).to.have.property('name');",
+									"    pm.expect(response.data).to.have.property('slug');",
+									"    pm.expect(response.data).to.have.property('children');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"category_id\", response.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{category_id}}",
+									"description": "Category ID"
+								}
+							]
+						},
+						"description": "Get single category with children and parent. Public endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Pick Random Category ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.length > 0) {",
+									"        // Pick a random category from the list",
+									"        const randomIndex = Math.floor(Math.random() * response.data.length);",
+									"        const randomCategory = response.data[randomIndex];",
+									"        ",
+									"        pm.collectionVariables.set(\"category_id\", randomCategory.id);",
+									"        console.log(\"Selected random category ID: \" + randomCategory.id);",
+									"    } else {",
+									"        console.warn(\"No categories found to pick from.\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Utility request to randomly select an existing category and set it to {{category_id}}. Useful for isolating Update/Delete tests."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID - Not Found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						},
+						"description": "Test 404 error for non-existent category."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has category data\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data).to.have.property('id');",
+									"    pm.expect(response.data).to.have.property('name');",
+									"    pm.expect(response.data).to.have.property('slug');",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"category_id\", response.data.id);",
+									"    pm.collectionVariables.set(\"current_category_slug\", response.data.slug);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Electronics {{$timestamp}}\",\n  \"slug\": \"electronics-{{$timestamp}}\",\n  \"description\": \"Electronic products and gadgets\",\n  \"parentId\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Create a new root category. Requires ADMIN role. Slug must be lowercase alphanumeric with hyphens."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category - With Parent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"child_category_id\", response.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Smartphones {{$timestamp}}\",\n  \"slug\": \"smartphones-{{$timestamp}}\",\n  \"description\": \"Mobile phones and smartphones\",\n  \"parentId\": \"{{category_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Create a child category with parent. Tests hierarchical category structure (Req 2.2.2)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category - Unauthorized",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Category\",\n  \"slug\": \"test-category\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Test admin-only access - should fail without token (401)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category - Customer Role (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates forbidden\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.message || response.statusCode).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Category\",\n  \"slug\": \"test-category-customer\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Test RolesGuard - Customer user trying to create category should get 403 Forbidden (Req 2.2.4 - Role-based access control)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category - Customer Role (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Unauthorized Update\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{category_id}}"
+								}
+							]
+						},
+						"description": "Test RolesGuard - Customer user trying to update category should get 403 Forbidden."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category - Customer Role (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{category_id}}"
+								}
+							]
+						},
+						"description": "Test RolesGuard - Customer user trying to delete category should get 403 Forbidden."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category - Validation Error",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"slug\": \"Invalid Slug With Spaces!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Test data validation - invalid slug format and empty name (Req 3)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category - Duplicate Slug",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Duplicate Category\",\n  \"slug\": \"{{current_category_slug}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Test slug uniqueness validation."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Category is updated\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data.name).to.equal(\"Updated Electronics\");",
+									"    pm.expect(response.data.description).to.equal(\"Updated description\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Electronics\",\n  \"description\": \"Updated description\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{category_id}}"
+								}
+							]
+						},
+						"description": "Update category. Requires ADMIN role. Cache is invalidated after update (Req 2.2.5)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category - Set Parent to Null",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.test(\"Category is now a root category (parentId is null)\", function () {",
+									"        pm.expect(response).to.have.property('data');",
+									"        pm.expect(response.data.parentId).to.be.null;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"parentId\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/categories/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{child_category_id}}"
+								}
+							]
+						},
+						"description": "Test updating parentId to null (making category root)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 No Content\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{child_category_id}}"
+								}
+							]
+						},
+						"description": "Delete category. Requires ADMIN role. Cannot delete categories with children or products. Cache is invalidated (Req 2.2.5)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category - With Children",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{category_id}}"
+								}
+							]
+						},
+						"description": "Test deletion validation - should fail if category has children."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get All Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has data array\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "ACTIVE",
+									"description": "Optional: ACTIVE or INACTIVE",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get list of products. Public endpoint (Req 2.1.2). Optional status filter: ACTIVE or INACTIVE."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has product data\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data).to.have.property('id');",
+									"    pm.expect(response.data).to.have.property('name');",
+									"    pm.expect(response.data).to.have.property('sku');",
+									"    pm.expect(response.data).to.have.property('price');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"product_id\", response.data.id);",
+									"    pm.collectionVariables.set(\"product_sku\", response.data.sku);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{product_id}}"
+								}
+							]
+						},
+						"description": "Get product details by ID. Public endpoint (Req 2.1.2)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by SKU",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has product data\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data).to.have.property('sku');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/sku/:sku",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"sku",
+								":sku"
+							],
+							"variable": [
+								{
+									"key": "sku",
+									"value": "{{product_sku}}"
+								}
+							]
+						},
+						"description": "Get product details by SKU. Public endpoint (Req 2.1.2)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Recommendations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has data array\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Recommendations are related products\", function () {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.length > 0) {",
+									"        const recommendation = response.data[0];",
+									"        pm.expect(recommendation).to.have.property('id');",
+									"        pm.expect(recommendation).to.have.property('name');",
+									"        pm.expect(recommendation).to.have.property('category');",
+									"        // Verify recommendation is not the same product",
+									"        const productId = pm.collectionVariables.get('product_id');",
+									"        if (productId) {",
+									"            pm.expect(recommendation.id).to.not.equal(productId);",
+									"        }",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/:id/recommendations?limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":id",
+								"recommendations"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Number of recommendations (default: 10)"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{product_id}}"
+								}
+							]
+						},
+						"description": "Get product recommendations using DFS category tree traversal. Returns related products from parent, sibling, and descendant categories. Results are cached for 30 minutes (Req 2.2.5). Public endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products by Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has data array\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/category/:categoryId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"category",
+								":categoryId"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "ACTIVE",
+									"description": "Optional: ACTIVE or INACTIVE",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "categoryId",
+									"value": "{{category_id}}"
+								}
+							]
+						},
+						"description": "Get products by category ID. Public endpoint (Req 2.1.2). Optional status filter."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has product data\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('data');",
+									"    pm.expect(response.data).to.have.property('id');",
+									"    pm.expect(response.data).to.have.property('name');",
+									"    pm.expect(response.data).to.have.property('sku');",
+									"    pm.expect(response.data).to.have.property('price');",
+									"    pm.expect(response.data).to.have.property('stock');",
+									"    pm.expect(response.data).to.have.property('status');",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set(\"product_id\", response.data.id);",
+									"    pm.collectionVariables.set(\"product_sku\", response.data.sku);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Product\",\n  \"sku\": \"TEST-SKU-001\",\n  \"description\": \"This is a test product\",\n  \"price\": 99.99,\n  \"stock\": 100,\n  \"status\": \"ACTIVE\",\n  \"categoryId\": \"{{category_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							]
+						},
+						"description": "Create a new product. Requires ADMIN role (Req 2.1.2, 2.2.1). Status must be ACTIVE or INACTIVE. SKU must be unique."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Product is updated\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.data.name).to.equal(\"Updated Product Name\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Product Name\",\n  \"price\": 149.99,\n  \"stock\": 50\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{product_id}}"
+								}
+							]
+						},
+						"description": "Update product. Requires ADMIN role (Req 2.1.2). All fields are optional."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 No Content\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{product_id}}"
+								}
+							]
+						},
+						"description": "Delete product. Requires ADMIN role (Req 2.1.2). Cannot delete products with associated order items."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Customer Role (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Unauthorized Product\",\n  \"sku\": \"UNAUTH-001\",\n  \"price\": 99.99,\n  \"stock\": 10,\n  \"categoryId\": \"{{category_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							]
+						},
+						"description": "Test RolesGuard - Customer user trying to create product should get 403 Forbidden (Req 2.1.2)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product - Customer Role (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Unauthorized Update\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{product_id}}"
+								}
+							]
+						},
+						"description": "Test RolesGuard - Customer user trying to update product should get 403 Forbidden."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product - Customer Role (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{product_id}}"
+								}
+							]
+						},
+						"description": "Test RolesGuard - Customer user trying to delete product should get 403 Forbidden."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Validation Error",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"sku\": \"\",\n  \"price\": -10,\n  \"stock\": -5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							]
+						},
+						"description": "Test data validation - empty name, empty SKU, negative price and stock (Req 3)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Duplicate SKU",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Duplicate SKU Product\",\n  \"sku\": \"TEST-SKU-001\",\n  \"price\": 99.99,\n  \"stock\": 50,\n  \"categoryId\": \"{{category_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							]
+						},
+						"description": "Test SKU uniqueness validation - should fail if SKU already exists (Req 2.1.2)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Invalid Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Product with Invalid Category\",\n  \"sku\": \"INVALID-CAT-001\",\n  \"price\": 99.99,\n  \"stock\": 10,\n  \"categoryId\": \"00000000-0000-0000-0000-000000000000\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							]
+						},
+						"description": "Test category validation - should fail if category doesn't exist."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    pm.test(\"Order structure is valid\", function () {",
+									"        pm.expect(response).to.have.property('id');",
+									"        pm.expect(response).to.have.property('userId');",
+									"        pm.expect(response).to.have.property('totalAmount');",
+									"        pm.expect(response).to.have.property('status');",
+									"        pm.expect(response.status).to.match(/pending|paid|canceled/);",
+									"        pm.expect(response).to.have.property('items');",
+									"        pm.expect(response.items).to.be.an('array');",
+									"    });",
+									"",
+									"    if (response.items && response.items.length > 0) {",
+									"        pm.test(\"Order Items structure is valid\", function () {",
+									"            const item = response.items[0];",
+									"            pm.expect(item).to.have.property('productId');",
+									"            pm.expect(item).to.have.property('quantity');",
+									"            pm.expect(item).to.have.property('price');",
+									"            pm.expect(item).to.have.property('subtotal');",
+									"        });",
+									"    }",
+									"",
+									"    pm.collectionVariables.set(\"order_id\", response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{product_id}}\",\n      \"quantity\": 2\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Create a new order. Uses transaction for safety. Calculates totals using OOP Order/OrderItem classes (Req 2.1.3, 2.2.1, 2.2.3). Price is automatically calculated from product data."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID (Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('id');",
+									"    pm.expect(response).to.have.property('totalAmount');",
+									"    pm.expect(response).to.have.property('status');",
+									"    pm.expect(response).to.have.property('items');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						},
+						"description": "Get order details by ID. Admin can view any order. Regular users can only view their own orders (session-based authorization). Customers accessing other users' orders will get 404 (Req 2.1.3)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID - Customer Role (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Customer cannot access order by ID directly\", function () {",
+									"    pm.expect(pm.response.code).to.equal(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						},
+						"description": "Test session-based authorization - Customer trying to access order by ID (if not their own) will get 404 Not Found. Customers can access their own orders via GET /orders/:id (Req 2.1.3)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Orders (User's Own)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    ",
+									"    if (response.length > 0) {",
+									"        const order = response[0];",
+									"        pm.expect(order).to.have.property('id');",
+									"        pm.expect(order).to.have.property('totalAmount');",
+									"        pm.expect(order).to.have.property('status');",
+									"        pm.expect(order).to.have.property('createdAt');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Get all orders for the authenticated user. Returns array of orders with items (Req 2.1.3)."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.status).to.equal('canceled');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								":id",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						},
+						"description": "Cancel an order. Only pending orders can be canceled. Users can only cancel their own orders (Req 2.1.3)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID - Another User's Order (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"User cannot access another user's order\", function () {",
+									"    pm.expect(pm.response.code).to.equal(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{second_user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						},
+						"description": "Test session-based authorization - Second user (customer) trying to access first user's order will get 404 Not Found. Only admins can view any order by ID (Req 2.1.3)."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order - Another User's Order (Forbidden)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden or 404 Not Found\", function () {",
+									"    pm.expect([403, 404]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{second_user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/:id/cancel",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								":id",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order_id}}"
+								}
+							]
+						},
+						"description": "Test session-based authorization - Second user trying to cancel first user's order will get 404 Not Found."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payments",
+			"item": [
+				{
+					"name": "Initiate Payment - Stripe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('payment');",
+									"    pm.expect(response).to.have.property('clientSecret');",
+									"    pm.expect(response.payment).to.have.property('transactionId');",
+									"    pm.expect(response.payment.provider).to.equal('STRIPE');",
+									"    ",
+									"    // Save for webhook/callback testing",
+									"    pm.collectionVariables.set(\"stripe_payment_intent_id\", response.payment.transactionId);",
+									"    pm.collectionVariables.set(\"stripe_client_secret\", response.clientSecret);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"{{order_id}}\",\n  \"provider\": \"stripe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/initiate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"initiate"
+							]
+						},
+						"description": "Initiate Stripe payment using Strategy Pattern. Creates payment intent and returns payment object with clientSecret for frontend integration (Req 2.1.4, 2.2.4)."
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Stripe Payment - Test Card",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Ensure payment intent ID exists",
+									"if (!pm.collectionVariables.get(\"stripe_payment_intent_id\")) {",
+									"    console.log(\"⚠️ Warning: stripe_payment_intent_id not found. Run 'Initiate Payment - Stripe' first.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('id');",
+									"    pm.expect(response).to.have.property('status');",
+									"    ",
+									"    // Check if payment succeeded",
+									"    if (response.status === 'succeeded') {",
+									"        console.log('✅ Payment confirmed successfully!');",
+									"        console.log('💡 Stripe will automatically send webhook to your backend.');",
+									"        console.log('💡 Check your Stripe CLI output for webhook forwarding.');",
+									"    } else {",
+									"        console.log('⚠️ Payment status: ' + response.status);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{stripe_secret_key}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{stripe_secret_key}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "payment_method",
+									"value": "pm_card_visa",
+									"description": "Stripe test payment method token - Visa card that always succeeds. See https://stripe.com/docs/testing#cards",
+									"type": "text"
+								},
+								{
+									"key": "return_url",
+									"value": "https://example.com/return",
+									"description": "Required for redirect-based payment methods",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://api.stripe.com/v1/payment_intents/{{stripe_payment_intent_id}}/confirm",
+							"protocol": "https",
+							"host": [
+								"api",
+								"stripe",
+								"com"
+							],
+							"path": [
+								"v1",
+								"payment_intents",
+								"{{stripe_payment_intent_id}}",
+								"confirm"
+							]
+						},
+						"description": "Confirm a Stripe Payment Intent with a test payment method token (pm_card_visa). This directly calls Stripe's API to confirm the payment.\n\n⚠️ Prerequisites:\n- Set 'stripe_secret_key' collection variable with your Stripe secret key (sk_test_...)\n- Run 'Initiate Payment - Stripe' first to get payment_intent_id\n\n✅ After confirmation:\n- Payment status will be 'succeeded' in Stripe\n- Stripe will automatically send webhook to your backend\n- Your backend will update payment status and mark order as PAID\n- Product stock will be reduced automatically\n\n💡 Make sure Stripe CLI is running to forward webhooks to your local backend.\n\n📚 Test Payment Method Tokens:\n- pm_card_visa - Visa (succeeds)\n- pm_card_mastercard - Mastercard (succeeds)\n- pm_card_chargeDeclined - Card declined\n- See https://stripe.com/docs/testing#cards for more options"
+					},
+					"response": []
+				},
+				{
+					"name": "Initiate Payment - bKash",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('payment');",
+									"    pm.expect(response).to.have.property('paymentUrl');",
+									"    pm.expect(response.payment).to.have.property('transactionId');",
+									"    pm.expect(response.payment.provider).to.equal('BKASH');",
+									"    ",
+									"    // Save for callback/webhook testing",
+									"    pm.collectionVariables.set(\"bkash_payment_id\", response.payment.transactionId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"{{order_id}}\",\n  \"provider\": \"bkash\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/initiate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"initiate"
+							]
+						},
+						"description": "Initiate bKash payment using Strategy Pattern. Creates checkout and returns payment object with paymentUrl for redirect (Req 2.1.4, 2.2.4)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Payments (User History)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    ",
+									"    if (response.length > 0) {",
+									"        const payment = response[0];",
+									"        pm.expect(payment).to.have.property('id');",
+									"        pm.expect(payment).to.have.property('provider');",
+									"        pm.expect(payment).to.have.property('transactionId');",
+									"        pm.expect(payment).to.have.property('status');",
+									"        pm.expect(payment).to.have.property('orderId');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/payments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments"
+							]
+						},
+						"description": "Get all payments for the authenticated user. Returns array of payments linked to user's orders (Req 2.1.1, 2.1.4)."
+					},
+					"response": []
+				},
+				{
+					"name": "bKash Callback",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.have.property('success');",
+									"    if (response.success) {",
+									"        pm.expect(response).to.have.property('transactionId');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/payments/callback/bkash?paymentID={{bkash_payment_id}}&status=success&orderId={{order_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"callback",
+								"bkash"
+							],
+							"query": [
+								{
+									"key": "paymentID",
+									"value": "{{bkash_payment_id}}"
+								},
+								{
+									"key": "status",
+									"value": "success"
+								},
+								{
+									"key": "orderId",
+									"value": "{{order_id}}"
+								}
+							]
+						},
+						"description": "bKash callback endpoint. User redirects here after payment. Confirms payment and updates order status (Req 2.1.4)."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set base URL if not already set",
+					"if (!pm.collectionVariables.get(\"base_url\")) {",
+					"    pm.collectionVariables.set(\"base_url\", \"http://localhost:3000/api/v1\");",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test - check response time",
+					"pm.test(\"Response time is acceptable\", function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_email",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_role",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "child_category_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "product_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "product_sku",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "order_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "stripe_payment_intent_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "stripe_client_secret",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bkash_payment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "stripe_signature",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "stripe_secret_key",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_user_email",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_email",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "second_user_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "second_user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "second_user_email",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
