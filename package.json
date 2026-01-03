@@ -8,6 +8,10 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
+    "dev:docker": "docker-compose -f docker-compose.dev.yml up",
+    "dev:docker:build": "docker-compose -f docker-compose.dev.yml up --build",
+    "dev:docker:down": "docker-compose -f docker-compose.dev.yml down",
+    "dev:docker:logs": "docker-compose -f docker-compose.dev.yml logs -f",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
@@ -15,9 +19,8 @@
     "dev:backend": "turbo run dev --filter=backend",
     "dev:web": "turbo run dev --filter=web",
     "dev:mobile": "turbo run dev --filter=mobile",
-    "docker:up": "cd apps/backend && docker-compose up -d",
-    "docker:down": "cd apps/backend && docker-compose down",
-    "docker:logs": "cd apps/backend && docker-compose logs -f"
+    "check-updates": "npx npm-check-updates",
+    "update-deps": "npx npm-check-updates -u"
   },
   "devDependencies": {
     "prettier": "^3.7.4",
@@ -28,7 +31,7 @@
     "glob": "^10.3.10"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
-  "packageManager": "npm@10.0.0"
+  "packageManager": "npm@11.7.0"
 }

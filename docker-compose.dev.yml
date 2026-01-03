@@ -1,0 +1,127 @@
+# compose.yaml
+name: ecommerce-platform
+
+services:
+  # Infrastructure Services
+  mysql:
+    image: mysql:8.4 # 8.4 is the current Long Term Support (LTS) standard
+    container_name: ecommerce-mysql-dev
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --max_connections=200
+      - --innodb_buffer_pool_size=256M
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-ecommerce_db}
+      MYSQL_USER: ${DB_USER:-root}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-rootpassword}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:8-alpine # UPDATED: Redis 8 is the new stable standard (since late 2025)
+    container_name: ecommerce-redis-dev
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly yes
+      - --appendfsync everysec
+      - --maxmemory 256mb
+      - --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # Backend API
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile.dev
+    container_name: ecommerce-backend-dev
+    restart: unless-stopped
+    env_file:
+      - ./apps/backend/.env
+    ports:
+      - "3000:3000"
+    # LATEST STANDARD: Compose Watch (Replaces old volume hacks)
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/backend
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./apps/backend/package.json
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+      - DATABASE_URL=mysql://${DB_USER:-root}:${DB_PASSWORD:-rootpassword}@mysql:3306/${DB_NAME:-ecommerce_db}?allowPublicKeyRetrieval=true
+
+  # Next.js Frontend
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile.dev
+    container_name: ecommerce-web-dev
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    # LATEST STANDARD: Compose Watch
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/web
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+        - action: rebuild
+          path: ./apps/web/package.json
+    depends_on:
+      - backend
+    networks:
+      - ecommerce-network
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
+      # Note: WATCHPACK_POLLING is REMOVED (No longer needed with Sync)
+
+volumes:
+  mysql_dev_data:
+  redis_dev_data:
+
+networks:
+  ecommerce-network:
+    driver: bridge
