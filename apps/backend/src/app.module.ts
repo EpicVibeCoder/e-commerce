@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { configValidationSchema } from './app.config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -45,6 +45,7 @@ import { RedisModule } from './redis/redis.module';
               process.env.DATABASE_URL = url.toString();
             } catch (e) {
               // If URL parsing fails, continue with original URL
+              console.error('❌ Error parsing DATABASE_URL:', e);
             }
           }
 

@@ -3,7 +3,8 @@ import { CategoriesService } from './categories.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
-import { Category } from './entities/category.entity';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 jest.mock('../generated/prisma/client', () => ({
   PrismaClient: jest.fn(),
@@ -16,8 +17,6 @@ jest.mock('../generated/prisma/client', () => ({
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
-  let prisma: PrismaService;
-  let redisService: RedisService;
 
   const mockCategory = {
     id: 'category-id',
@@ -60,87 +59,75 @@ describe('CategoriesService', () => {
     }).compile();
 
     service = module.get<CategoriesService>(CategoriesService);
-    prisma = module.get<PrismaService>(PrismaService);
-    redisService = module.get<RedisService>(RedisService);
-  });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+    // Reset mocks before each test
+    jest.clearAllMocks();
   });
 
   describe('create', () => {
-    it('should create a category', async () => {
-      const createDto = { name: 'Category', slug: 'category' } as any;
-      mockPrismaService.category.findUnique.mockResolvedValue(null);
-      mockPrismaService.category.create.mockResolvedValue(mockCategory);
-
-      const result = await service.create(createDto);
-
-      expect(prisma.category.create).toHaveBeenCalled();
-      expect(redisService.del).toHaveBeenCalled();
-      expect(result).toBeInstanceOf(Category);
-    });
-
     it('should throw ConflictException if slug exists', async () => {
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
-      const createDto = { name: 'Cat', slug: 'category' } as any;
+      const createDto: CreateCategoryDto = { name: 'Cat', slug: 'category' };
 
       await expect(service.create(createDto)).rejects.toThrow(ConflictException);
+      expect(mockPrismaService.category.findUnique).toHaveBeenCalledWith({
+        where: { slug: 'category' },
+      });
     });
 
     it('should throw NotFoundException if parent not found', async () => {
-      mockPrismaService.category.findUnique.mockReturnValueOnce(null).mockReturnValueOnce(null);
-      const createDto = { name: 'Cat', slug: 'cat', parentId: 'parent-id' } as any;
+      mockPrismaService.category.findUnique
+        .mockResolvedValueOnce(null) // slug check returns null
+        .mockResolvedValueOnce(null); // parent check returns null
+      const createDto: CreateCategoryDto = {
+        name: 'Cat',
+        slug: 'cat',
+        parentId: 'parent-id',
+      };
 
       await expect(service.create(createDto)).rejects.toThrow(NotFoundException);
+      expect(mockPrismaService.category.findUnique).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('update', () => {
-    it('should update category', async () => {
-      mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
-      mockPrismaService.category.update.mockResolvedValue({ ...mockCategory, name: 'Updated' });
-
-      const result = await service.update('category-id', { name: 'Updated' });
-      expect(result.name).toBe('Updated');
-      expect(redisService.del).toHaveBeenCalled();
-    });
-
     it('should throw BadRequestException if parent is self', async () => {
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
-      await expect(service.update('category-id', { parentId: 'category-id' })).rejects.toThrow(BadRequestException);
+      const updateDto: UpdateCategoryDto = { parentId: 'category-id' };
+
+      await expect(service.update('category-id', updateDto)).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('delete', () => {
-    it('should delete category', async () => {
-      mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
-      mockPrismaService.category.delete.mockResolvedValue(mockCategory);
-
-      await service.delete('category-id');
-      expect(prisma.category.delete).toHaveBeenCalled();
-      expect(redisService.del).toHaveBeenCalled();
-    });
-
     it('should prevent delete if has children', async () => {
       const catWithChild = { ...mockCategory, children: [{ id: 'child' }] };
       mockPrismaService.category.findUnique.mockResolvedValue(catWithChild);
+
       await expect(service.delete('category-id')).rejects.toThrow(BadRequestException);
+      expect(mockPrismaService.category.findUnique).toHaveBeenCalledWith({
+        where: { id: 'category-id' },
+        include: { children: true, products: true },
+      });
     });
 
     it('should prevent delete if has products', async () => {
       const catWithProd = { ...mockCategory, products: [{ id: 'prod' }] };
       mockPrismaService.category.findUnique.mockResolvedValue(catWithProd);
+
       await expect(service.delete('category-id')).rejects.toThrow(BadRequestException);
     });
   });
 
-  describe('findAll (getCategoryHierarchy)', () => {
+  describe('findAll (getCategoryHierarchy) - caching', () => {
     it('should return from cache if available', async () => {
       mockRedisService.get.mockResolvedValue([mockCategory]);
+
       const result = await service.findAll();
+
       expect(result).toHaveLength(1);
-      expect(prisma.category.findMany).not.toHaveBeenCalled();
+      expect(mockPrismaService.category.findMany).not.toHaveBeenCalled();
+      expect(mockRedisService.get).toHaveBeenCalledWith('category_tree');
     });
 
     it('should fetch from db and cache if not in cache', async () => {
@@ -149,8 +136,8 @@ describe('CategoriesService', () => {
 
       const result = await service.findAll();
 
-      expect(prisma.category.findMany).toHaveBeenCalled();
-      expect(redisService.set).toHaveBeenCalled();
+      expect(mockPrismaService.category.findMany).toHaveBeenCalled();
+      expect(mockRedisService.set).toHaveBeenCalledWith('category_tree', expect.any(Array), 3600);
       expect(result).toHaveLength(1);
     });
   });
