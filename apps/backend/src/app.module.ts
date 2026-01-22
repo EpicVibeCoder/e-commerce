@@ -3,11 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './app.config';
-import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
-import { redisStore } from 'cache-manager-redis-yet';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
@@ -91,36 +89,6 @@ import { RedisModule } from './redis/redis.module';
           return {};
         },
       ],
-    }),
-    CacheModule.registerAsync({
-      isGlobal: true,
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        const redisConfig: {
-          socket: {
-            host: string;
-            port: number;
-          };
-          password?: string;
-        } = {
-          socket: {
-            host: configService.get<string>('REDIS_HOST', 'localhost'),
-            port: configService.get<number>('REDIS_PORT', 6379),
-          },
-        };
-
-        const redisPassword = configService.get<string>('REDIS_PASSWORD');
-        if (redisPassword) {
-          redisConfig.password = redisPassword;
-        }
-
-        const store = await redisStore(redisConfig);
-        return {
-          store,
-          ttl: 3600000, // 1 hour in milliseconds
-        };
-      },
-      inject: [ConfigService],
     }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesService } from './categories.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { RedisService } from '../redis/redis.service';
 import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { Category } from './entities/category.entity';
 
@@ -17,7 +17,7 @@ jest.mock('../generated/prisma/client', () => ({
 describe('CategoriesService', () => {
   let service: CategoriesService;
   let prisma: PrismaService;
-  let cacheManager: any;
+  let redisService: RedisService;
 
   const mockCategory = {
     id: 'category-id',
@@ -38,7 +38,7 @@ describe('CategoriesService', () => {
     },
   };
 
-  const mockCacheManager = {
+  const mockRedisService = {
     get: jest.fn(),
     set: jest.fn(),
     del: jest.fn(),
@@ -53,15 +53,15 @@ describe('CategoriesService', () => {
           useValue: mockPrismaService,
         },
         {
-          provide: CACHE_MANAGER,
-          useValue: mockCacheManager,
+          provide: RedisService,
+          useValue: mockRedisService,
         },
       ],
     }).compile();
 
     service = module.get<CategoriesService>(CategoriesService);
     prisma = module.get<PrismaService>(PrismaService);
-    cacheManager = module.get(CACHE_MANAGER);
+    redisService = module.get<RedisService>(RedisService);
   });
 
   it('should be defined', () => {
@@ -77,7 +77,7 @@ describe('CategoriesService', () => {
       const result = await service.create(createDto);
 
       expect(prisma.category.create).toHaveBeenCalled();
-      expect(cacheManager.del).toHaveBeenCalled();
+      expect(redisService.del).toHaveBeenCalled();
       expect(result).toBeInstanceOf(Category);
     });
 
@@ -103,7 +103,7 @@ describe('CategoriesService', () => {
 
       const result = await service.update('category-id', { name: 'Updated' });
       expect(result.name).toBe('Updated');
-      expect(cacheManager.del).toHaveBeenCalled();
+      expect(redisService.del).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if parent is self', async () => {
@@ -119,7 +119,7 @@ describe('CategoriesService', () => {
 
       await service.delete('category-id');
       expect(prisma.category.delete).toHaveBeenCalled();
-      expect(cacheManager.del).toHaveBeenCalled();
+      expect(redisService.del).toHaveBeenCalled();
     });
 
     it('should prevent delete if has children', async () => {
@@ -137,20 +137,20 @@ describe('CategoriesService', () => {
 
   describe('findAll (getCategoryHierarchy)', () => {
     it('should return from cache if available', async () => {
-      mockCacheManager.get.mockResolvedValue([mockCategory]);
+      mockRedisService.get.mockResolvedValue([mockCategory]);
       const result = await service.findAll();
       expect(result).toHaveLength(1);
       expect(prisma.category.findMany).not.toHaveBeenCalled();
     });
 
     it('should fetch from db and cache if not in cache', async () => {
-      mockCacheManager.get.mockResolvedValue(null);
+      mockRedisService.get.mockResolvedValue(null);
       mockPrismaService.category.findMany.mockResolvedValue([mockCategory]);
 
       const result = await service.findAll();
 
       expect(prisma.category.findMany).toHaveBeenCalled();
-      expect(cacheManager.set).toHaveBeenCalled();
+      expect(redisService.set).toHaveBeenCalled();
       expect(result).toHaveLength(1);
     });
   });

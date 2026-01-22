@@ -4,14 +4,18 @@ WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-
-COPY --chown=node:node package*.json ./
-
-USER node
-
+# Copy package files and install as root (no permission issues)
+COPY package*.json ./
 RUN npm install
 
+# Copy source code with proper ownership
 COPY --chown=node:node . .
+
+# Ensure all files including node_modules are owned by node user
+RUN chown -R node:node /app
+
+# Switch to node user for runtime
+USER node
 
 EXPOSE 3000
 
