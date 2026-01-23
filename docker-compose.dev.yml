@@ -1,5 +1,5 @@
 # compose.yaml
-name: ecommerce-platform
+name: ecommerce-platform-infrastructure
 
 services:
   # Infrastructure Services

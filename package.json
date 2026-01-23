@@ -12,6 +12,8 @@
     "dev:docker:build": "docker-compose -f docker-compose.dev.yml up --build",
     "dev:docker:down": "docker-compose -f docker-compose.dev.yml down",
     "dev:docker:logs": "docker-compose -f docker-compose.dev.yml logs -f",
+    "dev:infra": "docker-compose -f docker-compose.infrastructure.yml up -d",
+    "dev:infra:down": "docker-compose -f docker-compose.infrastructure.yml down",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
