@@ -21,6 +21,7 @@ dist
 # Misc
 .DS_Store
 *.pem
+.cursor
 
 # Debug
 npm-debug.log*
