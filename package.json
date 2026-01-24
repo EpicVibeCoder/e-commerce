@@ -25,8 +25,8 @@
     "update-deps": "npx npm-check-updates -u"
   },
   "devDependencies": {
-    "prettier": "^3.7.4",
-    "turbo": "^2.7.2"
+    "prettier": "^3.8.1",
+    "turbo": "^2.7.5"
   },
   "overrides": {
     "inflight": "npm:@isaacs/inflight@^1.0.6",
@@ -35,5 +35,5 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "packageManager": "npm@11.7.0"
+  "packageManager": "npm@11.8.0"
 }
