@@ -8,9 +8,9 @@ import { BkashStrategy } from './strategies/bkash.strategy';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [ConfigModule, PrismaModule, OrdersModule],
-  controllers: [PaymentsController],
-  providers: [PaymentsService, StripeStrategy, BkashStrategy],
-  exports: [PaymentsService],
+      imports: [ConfigModule, PrismaModule, OrdersModule],
+      controllers: [PaymentsController],
+      providers: [PaymentsService, StripeStrategy, BkashStrategy],
+      exports: [PaymentsService],
 })
 export class PaymentsModule {}

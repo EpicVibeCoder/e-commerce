@@ -9,146 +9,146 @@ import { PaymentProvider, PaymentStatus, OrderStatus } from '../generated/prisma
 import { Payment } from './entities/payment.entity';
 
 jest.mock('../generated/prisma/client', () => ({
-  PrismaClient: jest.fn(),
-  Role: { CUSTOMER: 'CUSTOMER', ADMIN: 'ADMIN' },
-  ProductStatus: { ACTIVE: 'ACTIVE', INACTIVE: 'INACTIVE' },
-  OrderStatus: { PENDING: 'PENDING', PAID: 'PAID', CANCELED: 'CANCELED' },
-  PaymentProvider: { STRIPE: 'STRIPE', BKASH: 'BKASH' },
-  PaymentStatus: { PENDING: 'PENDING', SUCCESS: 'SUCCESS', FAILED: 'FAILED' },
+      PrismaClient: jest.fn(),
+      Role: { CUSTOMER: 'CUSTOMER', ADMIN: 'ADMIN' },
+      ProductStatus: { ACTIVE: 'ACTIVE', INACTIVE: 'INACTIVE' },
+      OrderStatus: { PENDING: 'PENDING', PAID: 'PAID', CANCELED: 'CANCELED' },
+      PaymentProvider: { STRIPE: 'STRIPE', BKASH: 'BKASH' },
+      PaymentStatus: { PENDING: 'PENDING', SUCCESS: 'SUCCESS', FAILED: 'FAILED' },
 }));
 
 describe('PaymentsService', () => {
-  let service: PaymentsService;
-  let prisma: PrismaService;
-  let ordersService: OrdersService;
-  let stripeStrategy: StripeStrategy;
+      let service: PaymentsService;
+      let prisma: PrismaService;
+      let ordersService: OrdersService;
+      let stripeStrategy: StripeStrategy;
 
-  const mockOrder = {
-    id: 'order-id',
-    userId: 'user-id',
-    totalAmount: 100,
-    status: OrderStatus.PENDING,
-  };
+      const mockOrder = {
+            id: 'order-id',
+            userId: 'user-id',
+            totalAmount: 100,
+            status: OrderStatus.PENDING,
+      };
 
-  const mockPayment = {
-    id: 'payment-id',
-    orderId: 'order-id',
-    provider: PaymentProvider.STRIPE,
-    transactionId: 'txn_123',
-    status: PaymentStatus.PENDING,
-    intentResponse: {},
-  };
+      const mockPayment = {
+            id: 'payment-id',
+            orderId: 'order-id',
+            provider: PaymentProvider.STRIPE,
+            transactionId: 'txn_123',
+            status: PaymentStatus.PENDING,
+            intentResponse: {},
+      };
 
-  const mockPrismaService = {
-    order: {
-      findUnique: jest.fn(),
-    },
-    payment: {
-      findFirst: jest.fn(),
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      findMany: jest.fn(),
-    },
-  };
+      const mockPrismaService = {
+            order: {
+                  findUnique: jest.fn(),
+            },
+            payment: {
+                  findFirst: jest.fn(),
+                  create: jest.fn(),
+                  findUnique: jest.fn(),
+                  update: jest.fn(),
+                  findMany: jest.fn(),
+            },
+      };
 
-  const mockOrdersService = {
-    markAsPaid: jest.fn(),
-  };
+      const mockOrdersService = {
+            markAsPaid: jest.fn(),
+      };
 
-  const mockStripeStrategy = {
-    createPaymentIntent: jest.fn(),
-    confirmPayment: jest.fn(),
-    handleWebhook: jest.fn(),
-  };
+      const mockStripeStrategy = {
+            createPaymentIntent: jest.fn(),
+            confirmPayment: jest.fn(),
+            handleWebhook: jest.fn(),
+      };
 
-  const mockBkashStrategy = {
-    createPaymentIntent: jest.fn(),
-    confirmPayment: jest.fn(),
-    handleWebhook: jest.fn(),
-  };
+      const mockBkashStrategy = {
+            createPaymentIntent: jest.fn(),
+            confirmPayment: jest.fn(),
+            handleWebhook: jest.fn(),
+      };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PaymentsService,
-        {
-          provide: PrismaService,
-          useValue: mockPrismaService,
-        },
-        {
-          provide: OrdersService,
-          useValue: mockOrdersService,
-        },
-        {
-          provide: StripeStrategy,
-          useValue: mockStripeStrategy,
-        },
-        {
-          provide: BkashStrategy,
-          useValue: mockBkashStrategy,
-        },
-      ],
-    }).compile();
+      beforeEach(async () => {
+            const module: TestingModule = await Test.createTestingModule({
+                  providers: [
+                        PaymentsService,
+                        {
+                              provide: PrismaService,
+                              useValue: mockPrismaService,
+                        },
+                        {
+                              provide: OrdersService,
+                              useValue: mockOrdersService,
+                        },
+                        {
+                              provide: StripeStrategy,
+                              useValue: mockStripeStrategy,
+                        },
+                        {
+                              provide: BkashStrategy,
+                              useValue: mockBkashStrategy,
+                        },
+                  ],
+            }).compile();
 
-    service = module.get<PaymentsService>(PaymentsService);
-    prisma = module.get<PrismaService>(PrismaService);
-    ordersService = module.get<OrdersService>(OrdersService);
-    stripeStrategy = module.get<StripeStrategy>(StripeStrategy);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  describe('initiatePayment', () => {
-    it('should initiate payment', async () => {
-      const dto = { orderId: 'order-id', provider: PaymentProvider.STRIPE };
-      mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
-      mockPrismaService.payment.findFirst.mockResolvedValue(null);
-      mockStripeStrategy.createPaymentIntent.mockResolvedValue({
-        transactionId: 'txn_123',
-        clientSecret: 'secret',
-        paymentUrl: 'url',
+            service = module.get<PaymentsService>(PaymentsService);
+            prisma = module.get<PrismaService>(PrismaService);
+            ordersService = module.get<OrdersService>(OrdersService);
+            stripeStrategy = module.get<StripeStrategy>(StripeStrategy);
       });
-      mockPrismaService.payment.create.mockResolvedValue(mockPayment);
 
-      const result = await service.initiatePayment('user-id', dto);
+      it('should be defined', () => {
+            expect(service).toBeDefined();
+      });
 
-      expect(stripeStrategy.createPaymentIntent).toHaveBeenCalled();
-      expect(prisma.payment.create).toHaveBeenCalled();
-      expect(result.clientSecret).toBe('secret');
-    });
+      describe('initiatePayment', () => {
+            it('should initiate payment', async () => {
+                  const dto = { orderId: 'order-id', provider: PaymentProvider.STRIPE };
+                  mockPrismaService.order.findUnique.mockResolvedValue(mockOrder);
+                  mockPrismaService.payment.findFirst.mockResolvedValue(null);
+                  mockStripeStrategy.createPaymentIntent.mockResolvedValue({
+                        transactionId: 'txn_123',
+                        clientSecret: 'secret',
+                        paymentUrl: 'url',
+                  });
+                  mockPrismaService.payment.create.mockResolvedValue(mockPayment);
 
-    it('should throw NotFoundException if order not found', async () => {
-      mockPrismaService.order.findUnique.mockResolvedValue(null);
-      const dto = { orderId: 'order-id', provider: PaymentProvider.STRIPE };
-      await expect(service.initiatePayment('user-id', dto)).rejects.toThrow(NotFoundException);
-    });
-  });
+                  const result = await service.initiatePayment('user-id', dto);
 
-  describe('confirmPayment', () => {
-    it('should confirm payment and mark order as paid', async () => {
-      mockStripeStrategy.confirmPayment.mockResolvedValue({ status: 'SUCCESS', transactionId: 'txn_123' });
-      mockPrismaService.payment.findUnique.mockResolvedValue(mockPayment);
-      mockPrismaService.payment.update.mockResolvedValue({ ...mockPayment, status: PaymentStatus.SUCCESS });
+                  expect(stripeStrategy.createPaymentIntent).toHaveBeenCalled();
+                  expect(prisma.payment.create).toHaveBeenCalled();
+                  expect(result.clientSecret).toBe('secret');
+            });
 
-      const result = await service.confirmPayment(PaymentProvider.STRIPE, 'txn_123');
+            it('should throw NotFoundException if order not found', async () => {
+                  mockPrismaService.order.findUnique.mockResolvedValue(null);
+                  const dto = { orderId: 'order-id', provider: PaymentProvider.STRIPE };
+                  await expect(service.initiatePayment('user-id', dto)).rejects.toThrow(NotFoundException);
+            });
+      });
 
-      expect(ordersService.markAsPaid).toHaveBeenCalledWith('order-id');
-      expect(result.status).toBe('SUCCESS');
-    });
-  });
+      describe('confirmPayment', () => {
+            it('should confirm payment and mark order as paid', async () => {
+                  mockStripeStrategy.confirmPayment.mockResolvedValue({ status: 'SUCCESS', transactionId: 'txn_123' });
+                  mockPrismaService.payment.findUnique.mockResolvedValue(mockPayment);
+                  mockPrismaService.payment.update.mockResolvedValue({ ...mockPayment, status: PaymentStatus.SUCCESS });
 
-  describe('handleWebhook', () => {
-    it('should handle webhook and update payment', async () => {
-      mockStripeStrategy.handleWebhook.mockResolvedValue({ status: 'SUCCESS', transactionId: 'txn_123' });
-      mockPrismaService.payment.findUnique.mockResolvedValue(mockPayment);
-      mockPrismaService.payment.update.mockResolvedValue({ ...mockPayment, status: PaymentStatus.SUCCESS });
+                  const result = await service.confirmPayment(PaymentProvider.STRIPE, 'txn_123');
 
-      await service.handleWebhook(PaymentProvider.STRIPE, {}, 'sig');
+                  expect(ordersService.markAsPaid).toHaveBeenCalledWith('order-id');
+                  expect(result.status).toBe('SUCCESS');
+            });
+      });
 
-      expect(ordersService.markAsPaid).toHaveBeenCalledWith('order-id');
-    });
-  });
+      describe('handleWebhook', () => {
+            it('should handle webhook and update payment', async () => {
+                  mockStripeStrategy.handleWebhook.mockResolvedValue({ status: 'SUCCESS', transactionId: 'txn_123' });
+                  mockPrismaService.payment.findUnique.mockResolvedValue(mockPayment);
+                  mockPrismaService.payment.update.mockResolvedValue({ ...mockPayment, status: PaymentStatus.SUCCESS });
+
+                  await service.handleWebhook(PaymentProvider.STRIPE, {}, 'sig');
+
+                  expect(ordersService.markAsPaid).toHaveBeenCalledWith('order-id');
+            });
+      });
 });
