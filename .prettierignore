@@ -1,0 +1,26 @@
+# Dependencies and build
+node_modules
+.pnp
+.pnp.js
+.next
+out
+build
+dist
+.turbo
+
+# Lock and cache
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*.tsbuildinfo
+
+# Generated
+**/node_modules/.prisma
+
+# Env and secrets
+.env
+.env.*
+
+# Misc
+coverage
+*.min.js

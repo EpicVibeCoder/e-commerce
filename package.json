@@ -1,24 +1,30 @@
 {
-  "name": "e-commerce",
-  "private": true,
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
-  },
-  "devDependencies": {
-    "prettier": "^3.7.4",
-    "turbo": "^2.8.3",
-    "typescript": "5.9.2"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "packageManager": "npm@11.6.1",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+      "name": "e-commerce",
+      "private": true,
+      "scripts": {
+            "build": "turbo run build",
+            "dev": "turbo run dev",
+            "lint": "turbo run lint",
+            "check-types": "turbo run check-types",
+            "db:generate": "npm run db:generate --workspace=packages/database",
+            "db:migrate": "npm run db:migrate --workspace=packages/database",
+            "db:seed": "npm run db:seed --workspace=packages/database",
+            "test": "turbo run test",
+            "test:coverage": "turbo run test:coverage",
+            "format": "prettier --write .",
+            "format:check": "prettier --check ."
+      },
+      "devDependencies": {
+            "prettier": "^3.7.4",
+            "turbo": "^2.8.3",
+            "typescript": "5.9.2"
+      },
+      "engines": {
+            "node": ">=18"
+      },
+      "packageManager": "npm@11.6.1",
+      "workspaces": [
+            "apps/*",
+            "packages/*"
+      ]
 }
