@@ -5,6 +5,17 @@
             "build": "echo \"API build placeholder\"",
             "dev": "echo \"API dev placeholder\"",
             "lint": "echo \"API lint placeholder\"",
-            "test": "echo \"No tests yet\""
+            "test": "jest",
+            "test:coverage": "jest --coverage"
+      },
+      "dependencies": {
+            "@repo/jest-config": "*"
+      },
+      "devDependencies": {
+            "jest": "^29.7.0",
+            "jest-environment-jsdom": "^29.7.0",
+            "@testing-library/react": "^16.2.0",
+            "@testing-library/jest-dom": "^6.6.3",
+            "@types/jest": "^29.5.14"
       }
 }

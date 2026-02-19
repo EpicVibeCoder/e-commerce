@@ -9,6 +9,7 @@
             "db:generate": "dotenv -e .env -- npm run db:generate --workspace=packages/database",
             "db:migrate": "dotenv -e .env -- npm run db:migrate --workspace=packages/database",
             "db:seed": "dotenv -e .env -- npm run db:seed --workspace=packages/database",
+            "db:studio": "dotenv -e .env -- npx prisma studio --config packages/database/prisma.config.ts",
             "test": "turbo run test",
             "test:coverage": "turbo run test:coverage",
             "format": "prettier --write .",

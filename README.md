@@ -1,135 +1,97 @@
-# Turborepo starter
+# E-commerce Monorepo
 
-This Turborepo starter is maintained by the Turborepo core team.
+Turborepo monorepo: NestJS API, Next.js storefront & admin, React Native mobile, shared database (Prisma) and packages.
 
-## Using this example
+## Prerequisites
 
-Run the following command:
+- **Node.js** ≥ 24
+- **Docker** (for local Postgres and Redis/Valkey)
 
-```sh
-npx create-turbo@latest
+## Environment
+
+1. **Copy the example env file** and fill in values:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit `.env`:**
+
+   | Variable | Required | Description |
+   |----------|----------|-------------|
+   | `DATABASE_URL` | Yes | Postgres connection string, e.g. `postgresql://postgres:postgres@localhost:5432/ecommerce` |
+   | `REDIS_URL` | Yes | Redis/Valkey URL, e.g. `redis://localhost:6379` |
+   | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | For OAuth | From [Google Cloud Console](https://console.cloud.google.com/) |
+   | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | For payments | From [Stripe Dashboard](https://dashboard.stripe.com/) |
+   | `SSLCOMMERZ_STORE_ID` / `SSLCOMMERZ_STORE_PASSWD` | For SSLCommerz | Sandbox values for dev; set `SSLCOMMERZ_IS_LIVE=false` locally |
+
+   Root scripts (`db:*`, `dev`, etc.) load `.env` via `dotenv-cli`; keep `.env` at repo root and do not commit it.
+
+## Quick start
+
+```bash
+# Start Postgres and Redis (Valkey)
+docker compose up -d
+
+# Install dependencies
+npm install
+
+# Generate Prisma client and run migrations
+npm run db:generate
+npm run db:migrate
+
+# Run all apps in dev (web, api, etc.)
+npm run dev
 ```
 
-## What's inside?
+## Database and schema
 
-This Turborepo includes the following packages/apps:
+- **Schema:** `packages/database/prisma/schema.prisma`
+- **Config:** `packages/database/prisma.config.ts` (connection URL for Prisma CLI; uses `DATABASE_URL` from `.env`)
 
-### Apps and Packages
+From repo root:
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+| Command | Description |
+|---------|-------------|
+| `npm run db:generate` | Generate Prisma client |
+| `npm run db:migrate` | Apply migrations (interactive; creates new migrations when schema changes) |
+| `npm run db:seed` | Run seed script (when configured) |
+| `npm run db:studio` | Open Prisma Studio in the browser |
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Migrations are stored in `packages/database/prisma/migrations`. Run `db:migrate` after pulling schema changes.
 
-### Utilities
+## What's inside
 
-This Turborepo has some additional tools already setup for you:
+### Apps
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- **`apps/api`** – NestJS API (REST/GraphQL)
+- **`apps/web`** – Next.js storefront
+- **`apps/admin`** – Next.js admin panel
+- **`apps/mobile`** – React Native / Expo app
 
-### Build
+### Packages
 
-To build all apps and packages, run the following command:
+- **`packages/database`** – Prisma schema, client, migrations
+- **`packages/shared`** – Shared enums, types, DTOs
+- **`packages/ui`** – Shared React components
+- **`packages/typescript-config`** / **`packages/eslint-config`** – Shared configs
 
-```
-cd my-turborepo
+## Scripts (root)
 
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Run dev for all apps (Turbo) |
+| `npm run build` | Build all packages and apps |
+| `npm run lint` | Lint all workspaces |
+| `npm run check-types` | Type-check all workspaces |
+| `npm run test` | Run tests in all workspaces |
+| `npm run test:coverage` | Run tests with coverage |
+| `npm run format` | Format with Prettier |
+| `npm run format:check` | Check formatting |
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+To run a single app: `npm run dev -- --filter=web` (or `api`, `admin`, etc.).
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## Useful links
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- [Turborepo docs](https://turbo.build/repo/docs)
+- [Prisma docs](https://www.prisma.io/docs)
