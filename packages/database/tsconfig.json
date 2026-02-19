@@ -1,0 +1,10 @@
+{
+    "extends": "../../packages/typescript-config/base.json",
+    "compilerOptions": {
+      "outDir": "dist",
+      "rootDir": ".",
+      "noEmit": false
+    },
+    "include": ["prisma/**/*.ts", "src/**/*.ts"],
+    "exclude": ["node_modules", "dist"]
+  }

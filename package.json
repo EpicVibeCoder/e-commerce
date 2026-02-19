@@ -6,15 +6,16 @@
             "dev": "turbo run dev",
             "lint": "turbo run lint",
             "check-types": "turbo run check-types",
-            "db:generate": "npm run db:generate --workspace=packages/database",
-            "db:migrate": "npm run db:migrate --workspace=packages/database",
-            "db:seed": "npm run db:seed --workspace=packages/database",
+            "db:generate": "dotenv -e .env -- npm run db:generate --workspace=packages/database",
+            "db:migrate": "dotenv -e .env -- npm run db:migrate --workspace=packages/database",
+            "db:seed": "dotenv -e .env -- npm run db:seed --workspace=packages/database",
             "test": "turbo run test",
             "test:coverage": "turbo run test:coverage",
             "format": "prettier --write .",
             "format:check": "prettier --check ."
       },
       "devDependencies": {
+            "dotenv-cli": "^11.0.0",
             "prettier": "3.8.1",
             "turbo": "^2.8.9",
             "typescript": "^5.9.3"
@@ -26,5 +27,10 @@
       "workspaces": [
             "apps/*",
             "packages/*"
-      ]
+      ],
+      "dependencies": {
+            "@types/node": "^25.3.0",
+            "@types/pg": "^8.16.0",
+            "prisma": "^7.4.0"
+      }
 }
