@@ -1,10 +1,10 @@
 {
-  "name": "@repo/database",
-  "private": true,
-  "scripts": {
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:seed": "prisma db seed",
-    "test": "echo \"No tests yet\""
-  }
+      "name": "@repo/database",
+      "private": true,
+      "scripts": {
+            "db:generate": "prisma generate",
+            "db:migrate": "prisma migrate dev",
+            "db:seed": "prisma db seed",
+            "test": "echo \"No tests yet\""
+      }
 }

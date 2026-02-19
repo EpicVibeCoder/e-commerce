@@ -1,9 +1,9 @@
 {
-  "name": "@repo/shared",
-  "private": true,
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "test": "echo \"No tests yet\""
-  }
+      "name": "@repo/shared",
+      "private": true,
+      "main": "dist/index.js",
+      "types": "dist/index.d.ts",
+      "scripts": {
+            "test": "echo \"No tests yet\""
+      }
 }

@@ -1,10 +1,10 @@
 {
-  "name": "api",
-  "private": true,
-  "scripts": {
-    "build": "echo \"API build placeholder\"",
-    "dev": "echo \"API dev placeholder\"",
-    "lint": "echo \"API lint placeholder\"",
-    "test": "echo \"No tests yet\""
-  }
+      "name": "api",
+      "private": true,
+      "scripts": {
+            "build": "echo \"API build placeholder\"",
+            "dev": "echo \"API dev placeholder\"",
+            "lint": "echo \"API lint placeholder\"",
+            "test": "echo \"No tests yet\""
+      }
 }
