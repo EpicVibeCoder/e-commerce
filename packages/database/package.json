@@ -5,6 +5,7 @@
             "db:generate": "prisma generate",
             "db:migrate": "prisma migrate dev",
             "db:seed": "prisma db seed",
+            "build": "dotenv -e ../../.env -- prisma generate",
             "test": "jest",
             "test:coverage": "jest --coverage"
       },
