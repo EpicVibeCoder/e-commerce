@@ -3,6 +3,8 @@
       "compilerOptions": {
             "experimentalDecorators": true,
             "emitDecoratorMetadata": true,
+            "outDir": "dist",
+            "rootDir": "src"
       },
       "include": ["**/*.ts"],
       "exclude": ["node_modules", "dist"]

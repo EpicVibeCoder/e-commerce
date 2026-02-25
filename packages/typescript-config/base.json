@@ -15,6 +15,7 @@
             "skipLibCheck": true,
             "strict": true,
             "target": "ES2024",
-            "types": ["node", "jest"]
+            "types": ["node", "jest"],
+            "typeRoots": ["node_modules/@types", "../../node_modules/@types"]
       }
 }
