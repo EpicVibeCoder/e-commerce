@@ -1,11 +1,12 @@
 {
       "name": "@repo/database",
       "private": true,
+      "type": "module",
       "scripts": {
             "db:generate": "prisma generate",
             "db:migrate": "prisma migrate dev",
             "db:seed": "prisma db seed",
-            "build": "dotenv -e ../../.env -- prisma generate",
+            "build": "dotenv -e ../../.env -- prisma generate && tsc",
             "test": "jest",
             "test:coverage": "jest --coverage"
       },
@@ -24,5 +25,7 @@
             "prisma-erd-generator": "^2.4.2",
             "puppeteer": "^23.11.1",
             "ts-jest": "^29.2.5"
-      }
+      },
+      "main": "dist/generated/prisma/client.js",
+      "types": "dist/generated/prisma/client.d.ts"
 }
