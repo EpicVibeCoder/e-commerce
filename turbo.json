@@ -1,24 +1,34 @@
 {
       "$schema": "https://turborepo.dev/schema.json",
       "ui": "tui",
+      "globalDependencies": [".env"],
+      "globalEnv": ["DATABASE_URL", "REDIS_URL", "NODE_ENV"],
       "tasks": {
             "build": {
                   "dependsOn": ["^build"],
-                  "inputs": ["$TURBO_DEFAULT$", ".env*"],
-                  "outputs": [".next/**", "!.next/cache/**","dist/**"]
+                  "inputs": ["$TURBO_DEFAULT$", "!**/*.md", "!**/*.test.ts", ".env*"],
+                  "outputs": [".next/**", "!.next/cache/**", "dist/**", "generated/**"]
             },
             "lint": {
-                  "dependsOn": ["^lint"]
+                  "dependsOn": ["^topo"]
             },
             "check-types": {
-                  "dependsOn": ["^check-types"]
+                  "dependsOn": ["^build"]
             },
             "dev": {
                   "cache": false,
-                  "persistent": true
+                  "persistent": true,
+                  "dependsOn": ["^build"]
             },
 
-            "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
-            "test:coverage": { "dependsOn": ["^build"], "outputs": ["coverage/**"] }
+            "test": { "dependsOn": ["^build"], "inputs": ["$TURBO_DEFAULT$", "jest.config.*"], "outputs": ["coverage/**"] },
+            "test:coverage": {
+                  "dependsOn": ["^build"],
+                  "inputs": ["$TURBO_DEFAULT$", "jest.config.*"],
+                  "outputs": ["coverage/**"]
+            },
+            "topo": {
+                  "dependsOn": ["^topo"]
+            }
       }
 }

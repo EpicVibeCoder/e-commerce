@@ -1,44 +1,78 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # Dependencies
-node_modules
+node_modules/
 .pnp
 .pnp.js
+.yarn/install-state.gz
 
-# Local env files
+# Environment (keep .env.example committed)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
 # Testing
-coverage
+coverage/
 
 # Turbo
-.turbo
+.turbo/
 
 # Vercel
-.vercel
+.vercel/
 
-# Build Outputs
-.next/
+# Build outputs
+dist/
+build/
 out/
-build
-dist
+.next/
 
-# Prisma
-**/generated/prisma
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
 
+# Prisma (generated client; compiled @repo/database package)
+**/generated/prisma/
+packages/database/dist/
 
-# Debug
+# Logs and debug
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# Misc
+# Caches
+.cache/
+.eslintcache
+.stylelintcache
+
+# OS
 .DS_Store
-*.pem
+Thumbs.db
 
-# Cursor
-.cursor
+# IDE / editor (commit shared .vscode settings; ignore local overrides)
+.idea/
+*.swp
+*.swo
+*~
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Mobile / Expo (when apps/mobile is implemented)
+.expo/
+.expo-shared/
+
+# Secrets
+*.pem
+*.key
+*.p12
+*.jks
+*.p8
+
+# Cursor (local agent state; allow shared rules if added later)
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+
+# Tooling artifacts (Prisma ERD / Puppeteer)
+.puppeteer-cache/
