@@ -7,6 +7,7 @@
             "lint": "eslint --max-warnings 0",
             "test": "jest",
             "test:coverage": "jest --coverage",
+            "check-types": "tsc --noEmit",
             "nest:init": "nest new . --skip-git --skip-install --package-manager npm"
       },
       "dependencies": {
@@ -21,6 +22,7 @@
       },
       "devDependencies": {
             "@nestjs/cli": "^11.0.16",
-            "@nestjs/testing": "^11.0.16"
+            "@nestjs/testing": "^11.0.16",
+            "@repo/eslint-config": "*"
       }
 }

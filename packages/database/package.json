@@ -8,7 +8,9 @@
             "db:seed": "prisma db seed",
             "build": "dotenv -e ../../.env -- prisma generate && tsc",
             "test": "jest",
-            "test:coverage": "jest --coverage"
+            "test:coverage": "jest --coverage",
+            "lint": "eslint . --max-warnings 0",
+            "check-types": "tsc --noEmit"
       },
       "dependencies": {
             "@prisma/adapter-pg": "^7.4.0",
@@ -21,7 +23,8 @@
             "@mermaid-js/mermaid-cli": "^11.12.0",
             "prisma": "^7.4.0",
             "prisma-erd-generator": "^2.4.2",
-            "puppeteer": "^23.11.1"
+            "puppeteer": "^23.11.1",
+            "@repo/eslint-config": "*"
       },
       "main": "dist/generated/prisma/client.js",
       "types": "dist/generated/prisma/client.d.ts"
