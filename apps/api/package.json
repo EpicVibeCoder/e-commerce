@@ -14,9 +14,9 @@
             "@nestjs/common": "^11.0.16",
             "@nestjs/core": "^11.0.16",
             "@nestjs/platform-express": "^11.0.16",
-            "@repo/database": "workspace:*",
-            "@repo/jest-config": "workspace:*",
-            "@repo/shared": "workspace:*",
+            "@repo/database": "*",
+            "@repo/jest-config": "*",
+            "@repo/shared": "*",
             "reflect-metadata": "^0.2.2",
             "rxjs": "^7.8.2"
       },
