@@ -68,6 +68,8 @@ model Category {
   children  Category[] @relation("CategoryHierarchy")
   sortOrder Int        @default(0)
   products  Product[]
+
+  @@index([parentId])
 }
 
 model Product {
@@ -83,6 +85,9 @@ model Product {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   orderItems  OrderItem[]
+
+  @@index([categoryId])
+  @@index([status])
 }
 
 model Order {
@@ -95,6 +100,10 @@ model Order {
   updatedAt   DateTime    @updatedAt
   items       OrderItem[]
   payments    Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -106,6 +115,9 @@ model OrderItem {
   quantity  Int
   price     Decimal @db.Decimal(12, 2)
   subtotal  Decimal @db.Decimal(12, 2)
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 model Payment {
@@ -118,4 +130,7 @@ model Payment {
   rawResponse   Json?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([status])
 }
