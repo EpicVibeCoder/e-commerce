@@ -13,6 +13,40 @@ generator erd {
   theme    = "default"
 }
 
+enum Role {
+  customer
+  admin
+  super_admin
+}
+
+enum ProductStatus {
+  active
+  draft
+  archived
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  processing
+  shipped
+  delivered
+  cancelled
+}
+
+enum PaymentStatus {
+  pending
+  succeeded
+  failed
+  refunded
+  cancelled
+}
+
+enum PaymentProvider {
+  stripe
+  sslcommerz
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique

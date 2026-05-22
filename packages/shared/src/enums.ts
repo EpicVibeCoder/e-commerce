@@ -1,3 +1,9 @@
+export enum ProductStatus {
+      Active = "active",
+      Draft = "draft",
+      Archived = "archived",
+}
+
 export enum OrderStatus {
       Pending = "pending",
       Confirmed = "confirmed",
