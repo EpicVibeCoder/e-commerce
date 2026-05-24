@@ -26,9 +26,12 @@ npm install
 # 4. Database client and migrations
 npm run db:generate
 npm run db:migrate
+npm run db:seed
 ```
 
 `db:*` scripts load `.env` from the repo root via `dotenv-cli`. Do not commit `.env`.
+
+**Demo accounts** (after seed): `admin@demo.local` / `demo@customer.com` — password `DemoPassword123!`
 
 ### Minimum `.env` for local dev
 

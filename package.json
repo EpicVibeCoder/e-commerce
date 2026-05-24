@@ -9,7 +9,7 @@
             "db:generate": "dotenv -e .env -- npm run db:generate --workspace=packages/database",
             "db:migrate": "dotenv -e .env -- npm run db:migrate --workspace=packages/database",
             "db:seed": "dotenv -e .env -- npm run db:seed --workspace=packages/database",
-            "db:studio": "dotenv -e .env -- npx prisma studio --config packages/database/prisma.config.ts",
+            "db:studio": "dotenv -e .env -- npx prisma studio --config packages/database/prisma.config.ts --port 5555",
             "test": "turbo run test",
             "test:coverage": "turbo run test:coverage",
             "format": "prettier --write .",
@@ -18,16 +18,16 @@
       },
       "devDependencies": {
             "dotenv-cli": "^11.0.0",
-            "prettier": "3.8.1",
-            "turbo": "^2.8.9",
-            "typescript": "^5.9.3",
-            "eslint": "^9.39.1",
-            "@types/node": "^25.3.0",
-            "@types/pg": "^8.16.0",
-            "@types/jest": "^29.5.14",
-            "jest": "^30.2.0",
-            "ts-jest": "^29.2.5",
-            "prisma": "^7.4.0"
+            "prettier": "3.8.3",
+            "turbo": "^2.9.14",
+            "typescript": "^6.0.3",
+            "eslint": "^10.4.0",
+            "@types/node": "^25.9.1",
+            "@types/pg": "^8.20.0",
+            "@types/jest": "^30.0.0",
+            "jest": "^30.4.2",
+            "ts-jest": "^29.4.11",
+            "prisma": "^7.8.0"
       },
       "engines": {
             "node": ">=24"
