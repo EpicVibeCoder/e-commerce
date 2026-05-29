@@ -1,4 +1,4 @@
-export type { OrderStatus as OrderStatusType, PaymentStatus as PaymentStatusType, PaymentProvider as PaymentProviderType, Role as RoleType } from "./enums";
+export type { OrderStatus as OrderStatusType, PaymentStatus as PaymentStatusType, PaymentProvider as PaymentProviderType, Role as RoleType, ProductStatus as ProductStatusType} from "./enums";
 
 export interface PaginationQuery {
       page?: number;
