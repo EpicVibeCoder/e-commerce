@@ -30,5 +30,17 @@
             "@repo/eslint-config": "*"
       },
       "main": "dist/generated/prisma/client.js",
-      "types": "dist/generated/prisma/client.d.ts"
+      "types": "dist/generated/prisma/client.d.ts",
+      "exports": {
+            ".": {
+                  "types": "./dist/generated/prisma/client.d.ts",
+                  "import": "./dist/generated/prisma/client.js",
+                  "require": "./dist/generated/prisma/client.js"
+            },
+            "./enums": {
+                  "types": "./dist/generated/prisma/enums.d.ts",
+                  "import": "./dist/generated/prisma/enums.js",
+                  "require": "./dist/generated/prisma/enums.js"
+            }
+      }
 }

@@ -53,7 +53,7 @@ model User {
   passwordHash String?
   name         String?
   avatar       String?
-  role         String   @default("customer") // or use an enum
+  role         Role     @default(customer)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   orders       Order[]
@@ -73,17 +73,17 @@ model Category {
 }
 
 model Product {
-  id          String      @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
-  sku         String      @unique
+  sku         String        @unique
   description String?
-  price       Decimal     @db.Decimal(12, 2)
-  stock       Int         @default(0)
-  status      String      @default("active")
+  price       Decimal       @db.Decimal(12, 2)
+  stock       Int           @default(0)
+  status      ProductStatus @default(active)
   categoryId  String
-  category    Category    @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  category    Category      @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   orderItems  OrderItem[]
 
   @@index([categoryId])
@@ -95,7 +95,7 @@ model Order {
   userId      String
   user        User        @relation(fields: [userId], references: [id])
   totalAmount Decimal     @db.Decimal(12, 2)
-  status      String      @default("pending")
+  status      OrderStatus @default(pending)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   items       OrderItem[]
@@ -121,15 +121,15 @@ model OrderItem {
 }
 
 model Payment {
-  id            String   @id @default(cuid())
+  id            String          @id @default(cuid())
   orderId       String
-  order         Order    @relation(fields: [orderId], references: [id])
-  provider      String // "stripe" | "sslcommerz"
-  transactionId String   @unique
-  status        String   @default("pending")
+  order         Order           @relation(fields: [orderId], references: [id])
+  provider      PaymentProvider
+  transactionId String          @unique
+  status        PaymentStatus   @default(pending)
   rawResponse   Json?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   @@index([orderId])
   @@index([status])

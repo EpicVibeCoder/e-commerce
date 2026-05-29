@@ -95,6 +95,8 @@ Same pattern for `admin` (`start` on port 3002) and `api` (`nest start` / built 
 - **CLI config:** [`packages/database/prisma.config.ts`](packages/database/prisma.config.ts) (uses `DATABASE_URL` from `.env`)
 - **Migrations:** [`packages/database/prisma/migrations`](packages/database/prisma/migrations)
 
+Domain enums (`OrderStatus`, `ProductStatus`, etc.) are defined in [`packages/database/prisma/schema.prisma`](packages/database/prisma/schema.prisma). Apps import them from `@repo/shared` (re-exported from Prisma). After changing enums: `npm run db:migrate` → `npm run db:generate` → `npm run build`.
+
 | Command | Description |
 |---------|-------------|
 | `npm run db:generate` | Generate Prisma client into `packages/database/generated/` |

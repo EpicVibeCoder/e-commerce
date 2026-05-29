@@ -18,6 +18,7 @@
             }
       },
       "dependencies": {
-            "@repo/jest-config": "*"
+            "@repo/jest-config": "*",
+            "@repo/database": "*"
       }
 }

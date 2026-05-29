@@ -2,7 +2,12 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcrypt";
-import { Prisma, PrismaClient } from "../generated/prisma/client.js";
+import {
+      Prisma,
+      PrismaClient,
+      ProductStatus,
+      Role,
+} from "../generated/prisma/client.js";
 
 /** Demo password for local / portfolio reviewers — change in production. */
 export const DEMO_PASSWORD = "DemoPassword123!";
@@ -31,7 +36,7 @@ async function upsertProduct(data: {
       price: string;
       stock: number;
       categoryId: string;
-      status?: string;
+      status?: ProductStatus;
 }) {
       return prisma.product.upsert({
             where: { sku: data.sku },
@@ -42,7 +47,7 @@ async function upsertProduct(data: {
                   price: new Prisma.Decimal(data.price),
                   stock: data.stock,
                   categoryId: data.categoryId,
-                  status: data.status ?? "active",
+                  status: data.status ?? ProductStatus.active,
             },
             update: {
                   name: data.name,
@@ -50,7 +55,7 @@ async function upsertProduct(data: {
                   price: new Prisma.Decimal(data.price),
                   stock: data.stock,
                   categoryId: data.categoryId,
-                  status: data.status ?? "active",
+                  status: data.status ?? ProductStatus.active,
             },
       });
 }
@@ -64,9 +69,9 @@ async function main() {
                   email: "admin@demo.local",
                   passwordHash,
                   name: "Demo Admin",
-                  role: "admin",
+                  role: Role.admin,
             },
-            update: { passwordHash, name: "Demo Admin", role: "admin" },
+            update: { passwordHash, name: "Demo Admin", role: Role.admin },
       });
 
       await prisma.user.upsert({
@@ -75,9 +80,13 @@ async function main() {
                   email: "demo@customer.com",
                   passwordHash,
                   name: "Demo Customer",
-                  role: "customer",
+                  role: Role.customer,
             },
-            update: { passwordHash, name: "Demo Customer", role: "customer" },
+            update: {
+                  passwordHash,
+                  name: "Demo Customer",
+                  role: Role.customer,
+            },
       });
 
       const electronics = await upsertCategory("electronics", "Electronics", 1);
@@ -242,7 +251,7 @@ async function main() {
                   price: "299.00",
                   stock: 0,
                   categoryId: electronics.id,
-                  status: "draft",
+                  status: ProductStatus.draft,
             },
       ];
 
