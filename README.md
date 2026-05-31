@@ -15,7 +15,8 @@ From the repository root:
 ```bash
 # 1. Environment
 cp .env.example .env
-# Edit .env — at minimum set DATABASE_URL and REDIS_URL (defaults match docker-compose below)
+# Fill in required variables (see table below), then verify:
+npm run env:check
 
 # 2. Infrastructure
 docker compose up -d
@@ -29,30 +30,42 @@ npm run db:migrate
 npm run db:seed
 ```
 
-`db:*` scripts load `.env` from the repo root via `dotenv-cli`. Do not commit `.env`.
+`db:*`, `dev`, `build`, and `test` load `.env` from the repo root via `dotenv-cli`. Do not commit `.env`.
 
 **Demo accounts** (after seed): `admin@demo.local` / `demo@customer.com` — password `DemoPassword123!`
 
-### Minimum `.env` for local dev
+## Environment variables
 
-| Variable | Example | Required for |
-|----------|---------|----------------|
+One root [`.env.example`](.env.example) drives the whole monorepo. Run `npm run env:check` before `dev` or `build` to catch missing required values early (with suggested defaults printed to the console).
+
+**Do not put `NODE_ENV` in `.env`.** Next.js and Node set `NODE_ENV` automatically (`development` for dev, `production` for builds). Use `APP_ENV` for application-level environment config in the API.
+
+### Required
+
+| Variable | Example | Used by |
+|----------|---------|---------|
+| `APP_ENV` | `development` | API config (`development` \| `production` \| `test`) |
+| `PORT` | `3000` | API listen port |
 | `DATABASE_URL` | `postgresql://postgres:postgres@localhost:5432/ecommerce` | Prisma, API |
-| `REDIS_URL` | `redis://localhost:6379` | Future cache/sessions |
+| `CORS_ORIGINS` | `http://localhost:3001,http://localhost:3002` | API CORS (comma-separated) |
 
-Optional (leave empty until you implement those features):
+### Optional
 
-| Variable | Purpose |
-|----------|---------|
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe |
-| `SSLCOMMERZ_STORE_ID` / `SSLCOMMERZ_STORE_PASSWD` / `SSLCOMMERZ_IS_LIVE` | SSLCommerz |
+| Variable | Example | Notes |
+|----------|---------|-------|
+| `REDIS_URL` | `redis://localhost:6379` | Validated when set; required once cache is implemented |
+| `JWT_SECRET` | (32+ chars) | Required by API when `APP_ENV=production` |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | — | Google OAuth (future) |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | — | Stripe (future) |
+| `SSLCOMMERZ_STORE_ID` / `SSLCOMMERZ_STORE_PASSWD` / `SSLCOMMERZ_IS_LIVE` | — | SSLCommerz (future) |
+
+Env specs live in [`packages/shared/src/env-spec.ts`](packages/shared/src/env-spec.ts). The API validates format at boot via `@nestjs/config` + `class-validator` in [`apps/api/src/config/env.validation.ts`](apps/api/src/config/env.validation.ts).
 
 ## Run the project
 
 ### All apps (Turbo)
 
-Starts every workspace that defines a `dev` script (API, web, admin; not mobile):
+Starts every workspace that defines a `dev` script (API, web, admin; not mobile). Runs `env:check` first.
 
 ```bash
 npm run dev
@@ -72,7 +85,7 @@ npm run dev -- --filter=admin
 |-----|-----|---------|
 | Storefront | http://localhost:3001 | `apps/web` |
 | Admin | http://localhost:3002 | `apps/admin` |
-| API | http://localhost:3000 | `apps/api` |
+| API (base) | http://localhost:3000/api/v1 | `apps/api` |
 | Prisma Studio | (CLI opens browser) | `npm run db:studio` |
 
 Postgres: `localhost:5432` (db `ecommerce`, user/password `postgres` by default).  
@@ -87,21 +100,32 @@ npm run build -- --filter=web
 npm run start --workspace=web
 ```
 
-Same pattern for `admin` (`start` on port 3002) and `api` (`nest start` / built output in `apps/api/dist`).
+Same pattern for `admin` (`start` on port 3002) and `api` (built output in `apps/api/dist`).
+
+## API (`apps/api`)
+
+Current baseline (Phase 0):
+
+- Global prefix **`/api/v1`**
+- **`ValidationPipe`** on all request DTOs (whitelist, transform)
+- **`ConfigModule`** with env validation at startup (fail fast on missing/invalid config)
+- **CORS** allowlist from `CORS_ORIGINS`
+- Prisma via [`@repo/database`](packages/database)
 
 ## Database
 
 - **Schema:** [`packages/database/prisma/schema.prisma`](packages/database/prisma/schema.prisma)
 - **CLI config:** [`packages/database/prisma.config.ts`](packages/database/prisma.config.ts) (uses `DATABASE_URL` from `.env`)
 - **Migrations:** [`packages/database/prisma/migrations`](packages/database/prisma/migrations)
+- **Seed:** [`packages/database/prisma/seed.ts`](packages/database/prisma/seed.ts) — demo users, nested categories, sample products
 
-Domain enums (`OrderStatus`, `ProductStatus`, etc.) are defined in [`packages/database/prisma/schema.prisma`](packages/database/prisma/schema.prisma). Apps import them from `@repo/shared` (re-exported from Prisma). After changing enums: `npm run db:migrate` → `npm run db:generate` → `npm run build`.
+Domain enums (`OrderStatus`, `ProductStatus`, etc.) are defined in the Prisma schema. Apps import them from `@repo/shared` (re-exported from Prisma). After changing enums: `npm run db:migrate` → `npm run db:generate` → `npm run build`.
 
 | Command | Description |
 |---------|-------------|
 | `npm run db:generate` | Generate Prisma client into `packages/database/generated/` |
-| `npm run db:migrate` | Apply migrations locally (`prisma migrate dev`; prompts for new migration names when the schema changes) |
-| `npm run db:seed` | Run seed script (when configured in the database package) |
+| `npm run db:migrate` | Apply migrations locally (`prisma migrate dev`) |
+| `npm run db:seed` | Run seed script |
 | `npm run db:studio` | Open Prisma Studio |
 
 After pulling schema changes: `npm run db:generate` then `npm run db:migrate`.
@@ -112,11 +136,12 @@ After pulling schema changes: `npm run db:generate` then `npm run db:migrate`.
 
 | Command | Description |
 |---------|-------------|
+| `npm run env:check` | Validate required `.env` variables (runs automatically before `dev` and `build`) |
 | `npm run validate` | `format:check` → `lint` → `check-types` → `test` → `build` |
 | `npm run lint` | ESLint (excludes `mobile`) |
 | `npm run check-types` | TypeScript / Next typegen (excludes `mobile`) |
 | `npm run test` | Jest across workspaces |
-| `npm run build` | Build packages and apps (excludes `mobile`) |
+| `npm run build` | Build packages and apps (excludes `mobile`; runs `env:check` first) |
 | `npm run format` | Prettier write |
 | `npm run format:check` | Prettier check |
 
@@ -128,7 +153,7 @@ Requires Docker + `.env` + `npm run db:generate` before `check-types`, `test`, o
 
 | Path | Stack | Notes |
 |------|-------|-------|
-| [`apps/api`](apps/api) | NestJS 11 | REST API; Prisma via `@repo/database` |
+| [`apps/api`](apps/api) | NestJS 11 | REST API at `/api/v1`; Prisma via `@repo/database` |
 | [`apps/web`](apps/web) | Next.js 16 | Storefront, port **3001** |
 | [`apps/admin`](apps/admin) | Next.js 16 | Admin panel, port **3002** |
 | [`apps/mobile`](apps/mobile) | — | Placeholder; not wired into Turbo quality tasks yet |
@@ -137,27 +162,43 @@ Requires Docker + `.env` + `npm run db:generate` before `check-types`, `test`, o
 
 | Path | Role |
 |------|------|
-| [`packages/database`](packages/database) | Prisma schema, client, migrations |
-| [`packages/shared`](packages/shared) | Shared enums, types, DTOs |
+| [`packages/database`](packages/database) | Prisma schema, client, migrations, seed |
+| [`packages/shared`](packages/shared) | Shared enums, types, env specs (`env-spec.ts`) |
 | [`packages/ui`](packages/ui) | Shared React components |
 | [`packages/eslint-config`](packages/eslint-config) | ESLint presets (`base`, `next-js`, `nest`, `react-internal`) |
 | [`packages/typescript-config`](packages/typescript-config) | Shared `tsconfig` bases |
 | [`packages/jest-config`](packages/jest-config) | Shared Jest config |
 
+### Scripts
+
+| Path | Role |
+|------|------|
+| [`scripts/check-env.ts`](scripts/check-env.ts) | Root env validation entrypoint (used by `npm run env:check`) |
+
 ## Troubleshooting
+
+**Missing environment variables / `env:check` fails**
+
+- Copy [`.env.example`](.env.example) to `.env` and fill required vars (`APP_ENV`, `PORT`, `DATABASE_URL`, `CORS_ORIGINS`)
+- Run `npm run env:check` — suggested values are printed for anything missing
+- Do **not** add `NODE_ENV` to `.env`; it breaks Next.js production builds
 
 **`db:generate` or API fails on database connection**
 
 - Ensure `docker compose up -d` and containers are healthy: `docker compose ps`
 - Confirm `DATABASE_URL` in `.env` matches compose (host `localhost`, port `5432`, db `ecommerce`)
 
-**`check-types` or `build` cannot find `@repo/database`**
+**`check-types` or `build` cannot find `@repo/shared` / `@repo/database`**
 
-- Run `npm run db:generate` then `npm run build -- --filter=@repo/database` (or `npm run build` at root)
+- Run `npm run build -- --filter=@repo/shared` and `npm run db:generate` (or `npm run build` at root)
+
+**Next.js build fails with `useContext` / non-standard `NODE_ENV`**
+
+- Remove `NODE_ENV` from `.env` if present; use `APP_ENV` instead
 
 **Port already in use**
 
-- Change ports in `apps/web/package.json` (`--port 3001`), `apps/admin` (`3002`), or `apps/api/src/main.ts` (`3000`)
+- Change `PORT` in `.env` for the API, or ports in `apps/web/package.json` (`3001`) and `apps/admin` (`3002`)
 
 **Prisma client out of date after git pull**
 

@@ -30,6 +30,5 @@ async function bootstrap() {
 
       await app.listen(port);
       console.log(`\n🚀 API is live!\n✅ NestJS ready\n🔗 http://localhost:${port}\n`);
-      console.log("Port", port);
 }
 bootstrap();
