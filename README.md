@@ -10,25 +10,47 @@ Turborepo monorepo with a NestJS API, Next.js storefront and admin, shared Prism
 
 ## First-time setup
 
-From the repository root:
+From the repository root. Run each command in order (one block = one copy-paste).
+
+**1. Environment** — copy the template, then edit `.env` with required variables (see table below).
 
 ```bash
-# 1. Environment
 cp .env.example .env
-# Fill in required variables (see table below)
+```
 
-# 2. Dependencies (installs dotenv-cli, tsx, turbo, etc.)
+**2. Dependencies** — installs `dotenv-cli`, `tsx`, `turbo`, etc.
+
+```bash
 npm install
+```
 
-# 3. Verify .env
+**3. Verify `.env`**
+
+```bash
 npm run env:check
+```
 
-# 4. Infrastructure
+**4. Infrastructure** — Postgres 18 + Valkey 8 (requires Docker running).
+
+```bash
 docker compose up -d
+```
 
-# 5. Database client and migrations
+**5. Database client**
+
+```bash
 npm run db:generate
+```
+
+**6. Migrations**
+
+```bash
 npm run db:migrate
+```
+
+**7. Seed demo data**
+
+```bash
 npm run db:seed
 ```
 
@@ -75,9 +97,21 @@ npm run dev
 
 ### One app
 
+**API**
+
 ```bash
 npm run dev -- --filter=api
+```
+
+**Storefront**
+
+```bash
 npm run dev -- --filter=web
+```
+
+**Admin**
+
+```bash
 npm run dev -- --filter=admin
 ```
 
@@ -95,14 +129,33 @@ Valkey: `localhost:6379`.
 
 ### Production-style run (single app)
 
-After a build:
+After a build, example for the storefront:
 
 ```bash
 npm run build -- --filter=web
+```
+
+```bash
 npm run start --workspace=web
 ```
 
-Same pattern for `admin` (`start` on port 3002) and `api` (built output in `apps/api/dist`).
+Same pattern for `admin` (`start` on port 3002) and `api` (built output in `apps/api/dist`):
+
+```bash
+npm run build -- --filter=admin
+```
+
+```bash
+npm run start --workspace=admin
+```
+
+```bash
+npm run build -- --filter=api
+```
+
+```bash
+npm run start --workspace=api
+```
 
 ## API (`apps/api`)
 
@@ -182,17 +235,46 @@ Requires Docker + `.env` + `npm run db:generate` before `check-types`, `test`, o
 **Missing environment variables / `env:check` fails**
 
 - Copy [`.env.example`](.env.example) to `.env` and fill required vars (`APP_ENV`, `PORT`, `DATABASE_URL`, `CORS_ORIGINS`)
-- Run `npm run env:check` — suggested values are printed for anything missing
+
+```bash
+cp .env.example .env
+```
+
+```bash
+npm run env:check
+```
+
 - Do **not** add `NODE_ENV` to `.env`; it breaks Next.js production builds
 
 **`db:generate` or API fails on database connection**
 
-- Ensure `docker compose up -d` and containers are healthy: `docker compose ps`
+- Ensure Docker is running, then start containers:
+
+```bash
+docker compose up -d
+```
+
+```bash
+docker compose ps
+```
+
 - Confirm `DATABASE_URL` in `.env` matches compose (host `localhost`, port `5432`, db `ecommerce`)
 
 **`check-types` or `build` cannot find `@repo/shared` / `@repo/database`**
 
-- Run `npm run build -- --filter=@repo/shared` and `npm run db:generate` (or `npm run build` at root)
+```bash
+npm run build -- --filter=@repo/shared
+```
+
+```bash
+npm run db:generate
+```
+
+Or build everything at root:
+
+```bash
+npm run build
+```
 
 **Next.js build fails with `useContext` / non-standard `NODE_ENV`**
 
@@ -206,6 +288,9 @@ Requires Docker + `.env` + `npm run db:generate` before `check-types`, `test`, o
 
 ```bash
 npm run db:generate
+```
+
+```bash
 npm run db:migrate
 ```
 
