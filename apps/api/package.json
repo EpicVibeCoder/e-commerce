@@ -11,7 +11,7 @@
             "nest:init": "nest new . --skip-git --skip-install --package-manager npm"
       },
       "dependencies": {
-            "@nestjs/common": "^11.0.16",
+            "@nestjs/common": "^11.1.24",
             "@nestjs/config": "^4.0.4",
             "@nestjs/core": "^11.0.16",
             "@nestjs/platform-express": "^11.0.16",
