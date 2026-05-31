@@ -15,28 +15,30 @@ From the repository root:
 ```bash
 # 1. Environment
 cp .env.example .env
-# Fill in required variables (see table below), then verify:
-npm run env:check
+# Fill in required variables (see table below)
 
-# 2. Infrastructure
-docker compose up -d
-
-# 3. Dependencies
+# 2. Dependencies (installs dotenv-cli, tsx, turbo, etc.)
 npm install
 
-# 4. Database client and migrations
+# 3. Verify .env
+npm run env:check
+
+# 4. Infrastructure
+docker compose up -d
+
+# 5. Database client and migrations
 npm run db:generate
 npm run db:migrate
 npm run db:seed
 ```
 
-`db:*`, `dev`, `build`, and `test` load `.env` from the repo root via `dotenv-cli`. Do not commit `.env`.
+`db:*`, `dev`, `build`, and `test` load `.env` from the repo root via `dotenv-cli` (requires `npm install` first). Do not commit `.env`.
 
 **Demo accounts** (after seed): `admin@demo.local` / `demo@customer.com` — password `DemoPassword123!`
 
 ## Environment variables
 
-One root [`.env.example`](.env.example) drives the whole monorepo. Run `npm run env:check` before `dev` or `build` to catch missing required values early (with suggested defaults printed to the console).
+One root [`.env.example`](.env.example) drives the whole monorepo. After `npm install`, run `npm run env:check` before `dev` or `build` to catch missing required values early (with suggested defaults printed to the console).
 
 **Do not put `NODE_ENV` in `.env`.** Next.js and Node set `NODE_ENV` automatically (`development` for dev, `production` for builds). Use `APP_ENV` for application-level environment config in the API.
 
