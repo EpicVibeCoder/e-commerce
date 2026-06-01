@@ -1,6 +1,13 @@
 {
       "name": "e-commerce",
       "private": true,
+      "lint-staged": {
+            "*.{js,jsx,ts,tsx,mjs,cjs,json,md,yml,yaml,css,mdx}": "prettier --write",
+            "apps/**/*.{js,jsx,ts,tsx,mjs}": "eslint --fix --max-warnings 0",
+            "packages/database/**/*.{js,ts,mjs}": "eslint --fix --max-warnings 0",
+            "packages/ui/**/*.{js,jsx,ts,tsx}": "eslint --fix --max-warnings 0",
+            "packages/shared/**/*.{js,ts,mjs}": "eslint --fix --max-warnings 0"
+      },
       "scripts": {
             "env:check": "dotenv -e .env -- tsx scripts/check-env.ts",
             "dev": "npm run env:check && dotenv -e .env -- turbo run dev",
@@ -13,22 +20,25 @@
             "db:studio": "dotenv -e .env -- npx prisma studio --config packages/database/prisma.config.ts --port 5555",
             "test": "dotenv -e .env -- turbo run test",
             "test:coverage": "turbo run test:coverage",
+            "prepare": "husky",
             "format": "prettier --write .",
             "format:check": "prettier --check .",
             "validate": "npm run format:check && npm run lint && npm run check-types && npm run test && npm run build"
       },
       "devDependencies": {
-            "dotenv-cli": "^11.0.0",
-            "prettier": "3.8.3",
-            "turbo": "^2.9.14",
-            "typescript": "^6.0.3",
-            "eslint": "^10.4.0",
+            "@types/jest": "^30.0.0",
             "@types/node": "^25.9.1",
             "@types/pg": "^8.20.0",
-            "@types/jest": "^30.0.0",
+            "dotenv-cli": "^11.0.0",
+            "eslint": "^10.4.0",
+            "husky": "^9.1.7",
             "jest": "^30.4.2",
+            "lint-staged": "^17.0.7",
+            "prettier": "3.8.3",
+            "prisma": "^7.8.0",
             "ts-jest": "^29.4.11",
-            "prisma": "^7.8.0"
+            "turbo": "^2.9.14",
+            "typescript": "^6.0.3"
       },
       "engines": {
             "node": ">=24"
@@ -37,6 +47,5 @@
       "workspaces": [
             "apps/*",
             "packages/*"
-      ],
-      "dependencies": {}
+      ]
 }

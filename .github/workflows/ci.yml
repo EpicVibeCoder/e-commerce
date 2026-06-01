@@ -1,0 +1,71 @@
+name: CI
+
+on:
+      push:
+            branches: [main]
+      pull_request:
+            branches: [main]
+
+concurrency:
+      group: ci-${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+jobs:
+      validate:
+            name: Validate
+            runs-on: ubuntu-latest
+            timeout-minutes: 20
+
+            services:
+                  postgres:
+                        image: postgres:18-alpine
+                        env:
+                              POSTGRES_USER: postgres
+                              POSTGRES_PASSWORD: postgres
+                              POSTGRES_DB: ecommerce
+                        ports:
+                              - 5432:5432
+                        options: >-
+                              --health-cmd "pg_isready -U postgres -d ecommerce"
+                              --health-interval 10s
+                              --health-timeout 5s
+                              --health-retries 5
+
+            env:
+                  APP_ENV: development
+                  PORT: "3000"
+                  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce
+                  CORS_ORIGINS: http://localhost:3001,http://localhost:3002
+                  REDIS_URL: redis://localhost:6379
+
+            steps:
+                  - name: Checkout
+                    uses: actions/checkout@v4
+
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v4
+                    with:
+                          node-version: "24"
+                          cache: npm
+
+                  - name: Install dependencies
+                    run: npm ci
+
+                  - name: Create .env for CI
+                    run: |
+                          cat > .env <<'EOF'
+                          APP_ENV=development
+                          PORT=3000
+                          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ecommerce
+                          CORS_ORIGINS=http://localhost:3001,http://localhost:3002
+                          REDIS_URL=redis://localhost:6379
+                          EOF
+
+                  - name: Generate Prisma client
+                    run: npm run db:generate
+
+                  - name: Apply migrations
+                    run: npx prisma migrate deploy --config packages/database/prisma.config.ts
+
+                  - name: Validate
+                    run: npm run validate
