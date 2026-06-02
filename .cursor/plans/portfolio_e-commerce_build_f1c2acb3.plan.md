@@ -53,12 +53,12 @@ isProject: false
 
 Apps live in one Git repo for portfolio convenience, but **each app is fully independent**: its own `package.json`, `package-lock.json`, dependencies, lint/test/build scripts, and deploy target. **No** npm workspaces, **no** Turborepo, **no** `packages/` shared libraries.
 
-| Path | Role | Port |
-|------|------|------|
-| [apps/api](apps/api) | NestJS 11 + Prisma (schema in `apps/api/prisma/`) | 3000 |
-| [apps/storefront](apps/storefront) | Next.js 16 customer storefront | 3001 |
-| [apps/admin](apps/admin) | Next.js 16 admin panel | 3002 |
-| [apps/mobile](apps/mobile) | Expo (React Native) — add when starting Phase 10 | — |
+| Path                               | Role                                              | Port |
+| ---------------------------------- | ------------------------------------------------- | ---- |
+| [apps/api](apps/api)               | NestJS 11 + Prisma (schema in `apps/api/prisma/`) | 3000 |
+| [apps/storefront](apps/storefront) | Next.js 16 customer storefront                    | 3001 |
+| [apps/admin](apps/admin)           | Next.js 16 admin panel                            | 3002 |
+| [apps/mobile](apps/mobile)         | Expo (React Native) — add when starting Phase 10  | —    |
 
 **Shared at repo root only (infrastructure & docs, not code):**
 
@@ -112,8 +112,8 @@ These are **non-negotiable portfolio signals**—weave them in as you go, not on
 | **Observability** | Structured logging (Pino) in API, request ID middleware, redact secrets in logs                                                                      |
 | **Data**          | Prisma migrations only under `apps/api/prisma/`, typed enums, indexes, idempotent webhooks, transactional stock updates                              |
 | **Testing**       | Tests live **inside each app**; API: domain units + supertest; frontends: component/e2e as appropriate                                               |
-| **Frontends**     | Accessible UI, loading/error/empty states, responsive layout; **local** components per app (no shared design-system package)                        |
-| **DX**            | README “run locally” lists `cd apps/<app>` steps; root README links to each app’s env vars                                                            |
+| **Frontends**     | Accessible UI, loading/error/empty states, responsive layout; **local** components per app (no shared design-system package)                         |
+| **DX**            | README “run locally” lists `cd apps/<app>` steps; root README links to each app’s env vars                                                           |
 | **Deploy**        | API container from `apps/api`; Vercel projects for storefront + admin (separate); public demo URLs + seed credentials                                |
 
 **Removed from plan:** monorepo/Turborepo, `packages/*`, `@repo/*` shared packages, assessment submission minimums, bKash comparison table.
@@ -124,13 +124,13 @@ These are **non-negotiable portfolio signals**—weave them in as you go, not on
 
 **Goal:** Each app runs cleanly; GitHub looks intentional to a client.
 
-| Task          | Details                                                                                                                                                           |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Schema        | `apps/api/prisma/schema.prisma`: Prisma enums (`OrderStatus`, `ProductStatus`, `PaymentStatus`, `PaymentProvider`), indexes on hot fields                         |
-| Seed          | `apps/api/prisma/seed.ts`: admin + demo customer + realistic catalog (categories 2–3 levels deep)                                                                  |
-| API bootstrap | [apps/api/src/main.ts](apps/api/src/main.ts): `PORT` from env, `ValidationPipe`, CORS, `/api/v1` global prefix                                                      |
-| CI            | `.github/workflows/ci.yml`: parallel jobs for `apps/api`, `apps/storefront`, `apps/admin` (correct `working-directory` + lockfile paths)                           |
-| Hooks         | Husky + lint-staged (scope lint to changed app paths)                                                                                                             |
+| Task          | Details                                                                                                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema        | `apps/api/prisma/schema.prisma`: Prisma enums (`OrderStatus`, `ProductStatus`, `PaymentStatus`, `PaymentProvider`), indexes on hot fields                                        |
+| Seed          | `apps/api/prisma/seed.ts`: admin + demo customer + realistic catalog (categories 2–3 levels deep)                                                                                |
+| API bootstrap | [apps/api/src/main.ts](apps/api/src/main.ts): `PORT` from env, `ValidationPipe`, CORS, `/api/v1` global prefix                                                                   |
+| CI            | `.github/workflows/ci.yml`: parallel jobs for `apps/api`, `apps/storefront`, `apps/admin` (correct `working-directory` + lockfile paths)                                         |
+| Hooks         | Husky + lint-staged (scope lint to changed app paths)                                                                                                                            |
 | Env           | `apps/api/.env.example`, `apps/storefront/.env.example`, `apps/admin/.env.example` — `JWT_*`, `DATABASE_URL`, `API_URL` / `NEXT_PUBLIC_API_URL`, Stripe, SSLCommerz, `REDIS_URL` |
 
 **Checkpoint:** CI green for all three apps; README quick start works from `cd apps/<app>` on a fresh clone.
@@ -179,8 +179,8 @@ These are **non-negotiable portfolio signals**—weave them in as you go, not on
 
 ```typescript
 interface PaymentStrategy {
-  initiate(order, ctx): Promise<InitiateResult>;
-  handleWebhook(headers, rawBody): Promise<WebhookResult>;
+      initiate(order, ctx): Promise<InitiateResult>;
+      handleWebhook(headers, rawBody): Promise<WebhookResult>;
 }
 ```
 
@@ -222,13 +222,13 @@ interface PaymentStrategy {
 
 **Goal:** Give clients a **link**, not “clone and run.”
 
-| Item          | Approach                                                                                           |
-| ------------- | ---------------------------------------------------------------------------------------------------- |
-| API           | `apps/api/Dockerfile` (multi-stage); compose stacks api + postgres + valkey                          |
-| Storefront    | Separate Vercel project → `apps/storefront`, `NEXT_PUBLIC_API_URL`                                   |
-| Admin         | Separate Vercel project → `apps/admin`, `NEXT_PUBLIC_API_URL`                                      |
-| Webhooks      | Stable API URL (Railway/Fly.io/Render); document Stripe/SSLCommerz dashboard setup                   |
-| Demo accounts | README: `demo@customer.com` / `admin@...` + test card instructions                                   |
+| Item          | Approach                                                                           |
+| ------------- | ---------------------------------------------------------------------------------- |
+| API           | `apps/api/Dockerfile` (multi-stage); compose stacks api + postgres + valkey        |
+| Storefront    | Separate Vercel project → `apps/storefront`, `NEXT_PUBLIC_API_URL`                 |
+| Admin         | Separate Vercel project → `apps/admin`, `NEXT_PUBLIC_API_URL`                      |
+| Webhooks      | Stable API URL (Railway/Fly.io/Render); document Stripe/SSLCommerz dashboard setup |
+| Demo accounts | README: `demo@customer.com` / `admin@...` + test card instructions                 |
 
 **Checkpoint:** Public URLs work; optional GIF walkthrough for Upwork profile.
 
@@ -273,12 +273,12 @@ interface PaymentStrategy {
 
 **New phase** — turns code into Upwork collateral.
 
-| Deliverable          | Content                                                                        |
-| -------------------- | ------------------------------------------------------------------------------ |
+| Deliverable          | Content                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------- |
 | `docs/CASE_STUDY.md` | Problem, stack, co-app architecture, challenges (webhooks, stock, cache), screenshots |
-| README hero          | Badges (CI per app), demo links, feature bullet list, “standalone apps” diagram |
-| Upwork project entry | Title, 2-min scope, tech tags, links to GitHub + live demo                     |
-| Optional             | 60–90s Loom: register → browse → pay → admin view order                        |
+| README hero          | Badges (CI per app), demo links, feature bullet list, “standalone apps” diagram       |
+| Upwork project entry | Title, 2-min scope, tech tags, links to GitHub + live demo                            |
+| Optional             | 60–90s Loom: register → browse → pay → admin view order                               |
 
 **Checkpoint:** You can send one link to a prospect that explains the whole system.
 
@@ -286,13 +286,13 @@ interface PaymentStrategy {
 
 ## Revised timeline (solo, part-time)
 
-| Phases | Focus                    | ~Duration  |
-| ------ | ------------------------ | ---------- |
-| 0–1    | Foundation + auth        | ~1 week    |
-| 2–4    | Core commerce + payments | ~2–3 weeks |
-| 5–7    | Quality + deploy + docs  | ~1.5 weeks |
+| Phases | Focus                       | ~Duration  |
+| ------ | --------------------------- | ---------- |
+| 0–1    | Foundation + auth           | ~1 week    |
+| 2–4    | Core commerce + payments    | ~2–3 weeks |
+| 5–7    | Quality + deploy + docs     | ~1.5 weeks |
 | 8–10   | Storefront + admin + mobile | ~3–4 weeks |
-| 11     | Portfolio packaging      | ~2–3 days  |
+| 11     | Portfolio packaging         | ~2–3 days  |
 
 **Total:** ~8–10 weeks part-time for a **complete** showcase.
 

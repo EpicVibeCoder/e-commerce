@@ -21,7 +21,7 @@ async function bootstrap() {
   const port = config.get('PORT', { infer: true });
   const appEnv = config.get('APP_ENV', { infer: true });
   const corsOrigins = config
-    .get('CORS_ORIGINS', { infer: true })!
+    .get('CORS_ORIGINS', { infer: true })
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
@@ -37,4 +37,4 @@ async function bootstrap() {
       `   url:  http://localhost:${port}/api/v1\n`,
   );
 }
-bootstrap();
+void bootstrap();

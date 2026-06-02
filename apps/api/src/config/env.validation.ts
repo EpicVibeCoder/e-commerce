@@ -1,4 +1,4 @@
-import { plainToInstance } from "class-transformer";
+import { plainToInstance } from 'class-transformer';
 import {
   IsEnum,
   IsInt,
@@ -8,12 +8,12 @@ import {
   Max,
   Min,
   validateSync,
-} from "class-validator";
+} from 'class-validator';
 
 enum AppEnv {
-  development = "development",
-  production = "production",
-  test = "test",
+  development = 'development',
+  production = 'production',
+  test = 'test',
 }
 
 export class EnvironmentVariables {
