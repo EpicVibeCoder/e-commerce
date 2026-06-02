@@ -1,12 +1,12 @@
 ---
 name: Portfolio e-commerce build
-overview: "Revised phased guide for a client-facing Upwork portfolio showcase: full-stack e-commerce (NestJS, Next.js web/admin, Expo) with Stripe + SSLCommerz, modern engineering standards (CI, tests, observability, polish), and explicit portfolio packaging—not a job assessment submission."
+overview: "Revised phased guide for a client-facing Upwork portfolio showcase: full-stack e-commerce (NestJS API, Next.js storefront + admin, Expo mobile) with Stripe + SSLCommerz, modern engineering standards (CI, tests, observability, polish), and explicit portfolio packaging—not a job assessment submission. Co-located standalone apps only—no monorepo, Turborepo, or shared packages."
 todos:
       - id: phase-0
-        content: "Phase 0: Schema enums/indexes, seed, API bootstrap, CI workflow, Husky/lint-staged, env docs"
+        content: "Phase 0: Schema enums/indexes, seed, API bootstrap, per-app CI jobs, Husky/lint-staged, env docs"
         status: pending
       - id: phase-1
-        content: "Phase 1: Domain layer + auth (JWT, /api/v1, health, Swagger-ready modules)"
+        content: "Phase 1: Domain layer in API + auth (JWT, /api/v1, health, Swagger-ready modules)"
         status: pending
       - id: phase-2
         content: "Phase 2: Catalog + admin CRUD, DFS recommendations, Redis category cache"
@@ -27,13 +27,13 @@ todos:
         content: "Phase 7: Docker API, Vercel frontends, public demo URLs, demo accounts in README"
         status: pending
       - id: phase-8
-        content: "Phase 8: Polished web storefront (@repo/ui, checkout, UX states)"
+        content: "Phase 8: Polished storefront (local UI, checkout, UX states)"
         status: pending
       - id: phase-9
         content: "Phase 9: Admin panel (CRUD, orders, dashboard)"
         status: pending
       - id: phase-10
-        content: "Phase 10: Expo mobile customer app"
+        content: "Phase 10: Expo mobile customer app (standalone)"
         status: pending
       - id: phase-11
         content: "Phase 11: Portfolio packaging (CASE_STUDY.md, README hero, Upwork/Loom assets)"
@@ -45,16 +45,29 @@ isProject: false
 
 **Purpose:** Build a **production-quality portfolio piece** for Upwork and future clients—not a take-home assessment submission. Every phase should produce something you can **demo, screenshot, and explain** in a case study.
 
-**Positioning on Upwork:** “Full-stack e-commerce: monorepo API + storefront + admin + mobile, real payments (Stripe + SSLCommerz), Redis caching, tested CI/CD, deployed demo.”
+**Positioning on Upwork:** “Full-stack e-commerce: standalone API + storefront + admin + mobile, real payments (Stripe + SSLCommerz), Redis caching, tested CI/CD, deployed demo.”
 
-**Stack (unchanged, already in repo):**
+---
 
-- [apps/api](apps/api) — NestJS 11, Prisma via [@repo/database](packages/database)
-- [apps/web](apps/web) — Next.js 16 storefront (`:3001`)
-- [apps/admin](apps/admin) — Next.js 16 admin (`:3002`)
-- [apps/mobile](apps/mobile) — Expo (React Native)
-- Postgres 18 + Valkey 8 — [docker-compose.yml](docker-compose.yml)
-- Payments: **Stripe** + **SSLCommerz** (Bangladesh gateway; no bKash)
+## Repository layout — co-app (not a monorepo)
+
+Apps live in one Git repo for portfolio convenience, but **each app is fully independent**: its own `package.json`, `package-lock.json`, dependencies, lint/test/build scripts, and deploy target. **No** npm workspaces, **no** Turborepo, **no** `packages/` shared libraries.
+
+| Path | Role | Port |
+|------|------|------|
+| [apps/api](apps/api) | NestJS 11 + Prisma (schema in `apps/api/prisma/`) | 3000 |
+| [apps/storefront](apps/storefront) | Next.js 16 customer storefront | 3001 |
+| [apps/admin](apps/admin) | Next.js 16 admin panel | 3002 |
+| [apps/mobile](apps/mobile) | Expo (React Native) — add when starting Phase 10 | — |
+
+**Shared at repo root only (infrastructure & docs, not code):**
+
+- [docker-compose.yml](docker-compose.yml) — Postgres 18 + Valkey 8
+- [README.md](README.md) — how to run each app
+- [docs/](docs/) — architecture, case study, payment guides
+- Optional root [package.json](package.json) — `concurrently` dev shortcuts only; must not declare `workspaces`
+
+**Cross-app integration:** HTTP + OpenAPI. Each frontend generates or hand-writes its own API client and types (e.g. `openapi-typescript` run inside that app). Duplicate UI components across storefront and admin if needed—**do not** extract a shared UI package for this portfolio.
 
 ```mermaid
 flowchart TB
@@ -63,22 +76,22 @@ flowchart TB
     Docs[Case study + architecture]
     Repo[Public GitHub README]
   end
-  subgraph clients [Apps]
-    Web[apps/web]
+  subgraph clients [Standalone apps]
+    Storefront[apps/storefront]
     Admin[apps/admin]
     Mobile[apps/mobile]
   end
   subgraph api [apps/api]
     REST[REST + OpenAPI]
-    Domain[Domain layer]
+    Domain[Domain layer in API]
     PayStrategies[Payment strategies]
     Cache[Redis category cache]
   end
-  Web --> REST
-  Admin --> REST
-  Mobile --> REST
+  Storefront -->|HTTPS| REST
+  Admin -->|HTTPS| REST
+  Mobile -->|HTTPS| REST
   REST --> Domain
-  Demo --> Web
+  Demo --> Storefront
   Demo --> Admin
   Docs --> api
 ```
@@ -91,43 +104,44 @@ These are **non-negotiable portfolio signals**—weave them in as you go, not on
 
 | Area              | Standard                                                                                                                                             |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Repo hygiene**  | Conventional commits, PR-sized chunks, `npm run validate` green before merge                                                                         |
-| **CI**            | GitHub Actions: lint, typecheck, test, build on every push; Postgres service for API tests                                                           |
-| **Git hooks**     | Husky + lint-staged (format + lint on staged files)                                                                                                  |
+| **Repo hygiene**  | Conventional commits, PR-sized chunks; each app’s `lint` + `check-types` + `test` + `build` green before merge                                       |
+| **CI**            | GitHub Actions: **separate job per app** (`working-directory: apps/api`, etc.); Postgres service only on API job                                     |
+| **Git hooks**     | Husky + lint-staged at repo root **or** per app—lint only staged files belonging to that app                                                         |
 | **API**           | Versioned prefix `/api/v1`, OpenAPI/Swagger, global validation, consistent error shape, health/ready                                                 |
-| **Security**      | Env validation, bcrypt, JWT + refresh optional, Helmet, CORS allowlist, rate limits, webhook signature verification, secrets never in client bundles |
-| **Observability** | Structured logging (Pino), request ID middleware, redact secrets in logs                                                                             |
-| **Data**          | Prisma migrations only, typed enums, indexes, idempotent webhooks, transactional stock updates                                                       |
-| **Testing**       | Domain unit tests, API integration tests (supertest), webhook fixtures; target meaningful coverage on money paths                                    |
-| **Frontends**     | Accessible UI (labels, focus, contrast), loading/error/empty states, responsive layout, shared `@repo/ui` design tokens                              |
-| **DX**            | [.env.example](.env.example) complete, README with architecture diagram + “run locally in 5 minutes”                                                 |
-| **Deploy**        | Dockerized API, Vercel for web/admin, public demo URL + seed credentials for reviewers                                                               |
+| **Security**      | Per-app `.env.example`; env validation in API; bcrypt, JWT, Helmet, CORS allowlist, rate limits, webhook signatures; secrets never in client bundles |
+| **Observability** | Structured logging (Pino) in API, request ID middleware, redact secrets in logs                                                                      |
+| **Data**          | Prisma migrations only under `apps/api/prisma/`, typed enums, indexes, idempotent webhooks, transactional stock updates                              |
+| **Testing**       | Tests live **inside each app**; API: domain units + supertest; frontends: component/e2e as appropriate                                               |
+| **Frontends**     | Accessible UI, loading/error/empty states, responsive layout; **local** components per app (no shared design-system package)                        |
+| **DX**            | README “run locally” lists `cd apps/<app>` steps; root README links to each app’s env vars                                                            |
+| **Deploy**        | API container from `apps/api`; Vercel projects for storefront + admin (separate); public demo URLs + seed credentials                                |
 
-**Removed from plan:** assessment submission minimums, bKash comparison table, “explain deviation to reviewers” notes.
+**Removed from plan:** monorepo/Turborepo, `packages/*`, `@repo/*` shared packages, assessment submission minimums, bKash comparison table.
 
 ---
 
 ## Phase 0 — Foundation and professional baseline (2–3 days)
 
-**Goal:** Repo runs cleanly and looks intentional to a client opening GitHub.
+**Goal:** Each app runs cleanly; GitHub looks intentional to a client.
 
 | Task          | Details                                                                                                                                                           |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Schema        | [schema.prisma](packages/database/prisma/schema.prisma): Prisma enums (`OrderStatus`, `ProductStatus`, `PaymentStatus`, `PaymentProvider`), indexes on hot fields |
-| Seed          | `prisma/seed.ts`: admin + demo customer + realistic catalog (categories 2–3 levels deep)                                                                          |
-| API bootstrap | [main.ts](apps/api/src/main.ts): `PORT` from env, `ValidationPipe`, CORS, `/api/v1` global prefix                                                                 |
-| CI + hooks    | `.github/workflows/ci.yml`, Husky + lint-staged                                                                                                                   |
-| Env           | Extend [.env.example](.env.example): `JWT_*`, `API_URL`, Stripe, SSLCommerz, `REDIS_URL`                                                                          |
+| Schema        | `apps/api/prisma/schema.prisma`: Prisma enums (`OrderStatus`, `ProductStatus`, `PaymentStatus`, `PaymentProvider`), indexes on hot fields                         |
+| Seed          | `apps/api/prisma/seed.ts`: admin + demo customer + realistic catalog (categories 2–3 levels deep)                                                                  |
+| API bootstrap | [apps/api/src/main.ts](apps/api/src/main.ts): `PORT` from env, `ValidationPipe`, CORS, `/api/v1` global prefix                                                      |
+| CI            | `.github/workflows/ci.yml`: parallel jobs for `apps/api`, `apps/storefront`, `apps/admin` (correct `working-directory` + lockfile paths)                           |
+| Hooks         | Husky + lint-staged (scope lint to changed app paths)                                                                                                             |
+| Env           | `apps/api/.env.example`, `apps/storefront/.env.example`, `apps/admin/.env.example` — `JWT_*`, `DATABASE_URL`, `API_URL` / `NEXT_PUBLIC_API_URL`, Stripe, SSLCommerz, `REDIS_URL` |
 
-**Checkpoint:** `npm run validate` passes in CI locally; README “Quick start” works on a fresh clone.
+**Checkpoint:** CI green for all three apps; README quick start works from `cd apps/<app>` on a fresh clone.
 
 ---
 
 ## Phase 1 — Domain layer + auth (4–5 days)
 
-**Goal:** Show clean architecture—domain rules separated from Nest infrastructure.
+**Goal:** Show clean architecture—domain rules in the API only, not shared across repos.
 
-**Domain classes** (`packages/domain` or `apps/api/src/domain/`): `User`, `Product`, `Order`, `OrderItem`, `Payment` with invariants and `Order.calculateTotals()`.
+**Domain classes** (`apps/api/src/domain/`): `User`, `Product`, `Order`, `OrderItem`, `Payment` with invariants and `Order.calculateTotals()`.
 
 **Modules:** `config`, `auth` (register/login/JWT), `users` (`/users/me`, orders, payments), `health`.
 
@@ -165,8 +179,8 @@ These are **non-negotiable portfolio signals**—weave them in as you go, not on
 
 ```typescript
 interface PaymentStrategy {
-      initiate(order, ctx): Promise<InitiateResult>;
-      handleWebhook(headers, rawBody): Promise<WebhookResult>;
+  initiate(order, ctx): Promise<InitiateResult>;
+  handleWebhook(headers, rawBody): Promise<WebhookResult>;
 }
 ```
 
@@ -190,17 +204,17 @@ interface PaymentStrategy {
 
 ## Phase 6 — Testing and technical docs (4–5 days)
 
-**Tests:** domain units, API integration (auth, orders, payments), webhook fixtures with mocked providers.
+**Tests (all under `apps/api` unless noted):** domain units, API integration (auth, orders, payments), webhook fixtures with mocked providers. Frontends: add tests in their own folders when UI grows.
 
 **Docs (client-facing quality):**
 | Doc | Path |
 |-----|------|
 | Architecture | `docs/architecture.md` |
-| ERD | [docs/ERD.svg](docs/ERD.svg) |
+| ERD | `docs/ERD.svg` |
 | API | Swagger + exported Postman collection |
 | Payments | `docs/payments/stripe.md`, `docs/payments/sslcommerz.md` |
 
-**Checkpoint:** CI runs tests; README links to docs and live demo (when Phase 7 done).
+**Checkpoint:** CI runs API tests; README links to docs and live demo (when Phase 7 done).
 
 ---
 
@@ -209,24 +223,25 @@ interface PaymentStrategy {
 **Goal:** Give clients a **link**, not “clone and run.”
 
 | Item          | Approach                                                                                           |
-| ------------- | -------------------------------------------------------------------------------------------------- |
-| API           | Multi-stage `apps/api/Dockerfile`; `docker-compose` for api + postgres + valkey                    |
-| Frontends     | Vercel: web + admin with `NEXT_PUBLIC_API_URL`                                                     |
-| Webhooks      | Stable API URL (Railway/Fly.io/Render or tunneled dev); document Stripe/SSLCommerz dashboard setup |
-| Demo accounts | README: `demo@customer.com` / `admin@...` + test card instructions                                 |
+| ------------- | ---------------------------------------------------------------------------------------------------- |
+| API           | `apps/api/Dockerfile` (multi-stage); compose stacks api + postgres + valkey                          |
+| Storefront    | Separate Vercel project → `apps/storefront`, `NEXT_PUBLIC_API_URL`                                   |
+| Admin         | Separate Vercel project → `apps/admin`, `NEXT_PUBLIC_API_URL`                                      |
+| Webhooks      | Stable API URL (Railway/Fly.io/Render); document Stripe/SSLCommerz dashboard setup                   |
+| Demo accounts | README: `demo@customer.com` / `admin@...` + test card instructions                                   |
 
-**Checkpoint:** Public URLs work; one recorded or GIF walkthrough optional for Upwork profile.
+**Checkpoint:** Public URLs work; optional GIF walkthrough for Upwork profile.
 
 ---
 
-## Phase 8 — Web storefront polish (6–8 days)
+## Phase 8 — Storefront polish (6–8 days)
 
 **Goal:** Visual proof of frontend skill—not a bare “Welcome” page.
 
-- Design system via [@repo/ui](packages/ui): typography, buttons, cards, layout
+- **Local** design tokens and components in `apps/storefront` (typography, buttons, cards, layout)
 - Auth, catalog, filters, product detail + recommendations, cart, checkout (Stripe Elements + SSLCommerz redirect), order history
 - **UX:** skeletons, toasts, 404/empty states, mobile-responsive
-- **Data:** TanStack Query or SWR; typed API client from `@repo/shared`
+- **Data:** TanStack Query or SWR; API client + types generated **inside** `apps/storefront` from OpenAPI (or maintained locally)
 
 **Checkpoint:** Client can complete purchase on production demo URL.
 
@@ -234,8 +249,10 @@ interface PaymentStrategy {
 
 ## Phase 9 — Admin panel (5–6 days)
 
-- Admin auth, product CRUD, category tree editor (cache invalidation), order/payment list, simple dashboard metrics
+- Standalone UI in `apps/admin` (tables, forms, category tree editor with cache invalidation triggers via API)
+- Admin auth, product CRUD, order/payment list, simple dashboard metrics
 - Polished tables, filters, confirm dialogs for destructive actions
+- Own API client/types (same OpenAPI approach as storefront—no shared package)
 
 **Checkpoint:** Admin change reflects on storefront within seconds.
 
@@ -243,10 +260,12 @@ interface PaymentStrategy {
 
 ## Phase 10 — Expo mobile (8–10 days)
 
-- Expo Router, shared types, auth, catalog, cart, checkout, orders
-- EAS build notes in README (optional TestFlight/APK for portfolio)
+- New folder `apps/mobile`: own `package.json`, Expo Router, env for `EXPO_PUBLIC_API_URL`
+- Auth, catalog, cart, checkout, orders against the same REST API
+- Types/client generated or copied in **this app only**; no import from storefront/admin
+- EAS build notes in `apps/mobile/README` (optional TestFlight/APK for portfolio)
 
-**Checkpoint:** Same API, mobile happy path recorded for portfolio.
+**Checkpoint:** Mobile happy path recorded for portfolio.
 
 ---
 
@@ -256,8 +275,8 @@ interface PaymentStrategy {
 
 | Deliverable          | Content                                                                        |
 | -------------------- | ------------------------------------------------------------------------------ |
-| `docs/CASE_STUDY.md` | Problem, stack, architecture, challenges (webhooks, stock, cache), screenshots |
-| README hero          | Badges (CI, stack), demo links, feature bullet list                            |
+| `docs/CASE_STUDY.md` | Problem, stack, co-app architecture, challenges (webhooks, stock, cache), screenshots |
+| README hero          | Badges (CI per app), demo links, feature bullet list, “standalone apps” diagram |
 | Upwork project entry | Title, 2-min scope, tech tags, links to GitHub + live demo                     |
 | Optional             | 60–90s Loom: register → browse → pay → admin view order                        |
 
@@ -272,12 +291,12 @@ interface PaymentStrategy {
 | 0–1    | Foundation + auth        | ~1 week    |
 | 2–4    | Core commerce + payments | ~2–3 weeks |
 | 5–7    | Quality + deploy + docs  | ~1.5 weeks |
-| 8–10   | Web + admin + mobile     | ~3–4 weeks |
+| 8–10   | Storefront + admin + mobile | ~3–4 weeks |
 | 11     | Portfolio packaging      | ~2–3 days  |
 
 **Total:** ~8–10 weeks part-time for a **complete** showcase.
 
-**MVP for first Upwork listing (faster):** Phases 0–7 + Phase 8 (basic web) + Phase 11 — add admin polish and mobile incrementally.
+**MVP for first Upwork listing (faster):** Phases 0–7 + Phase 8 (basic storefront) + Phase 11 — add admin polish and mobile incrementally.
 
 ---
 
@@ -289,4 +308,4 @@ Message **“Starting Phase N”** for a file-level checklist, review before pay
 
 ## First action
 
-**Phase 0:** enums/indexes, seed, CI workflow, Husky, API global prefix + validation. Confirm when `npm run validate` is green.
+**Phase 0:** Move/consolidate Prisma under `apps/api/prisma/`, enums/indexes, seed, per-app CI jobs, Husky, API global prefix + validation. Confirm CI is green for `apps/api`, `apps/storefront`, and `apps/admin`.
