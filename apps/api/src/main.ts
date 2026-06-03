@@ -31,10 +31,10 @@ async function bootstrap() {
   await app.listen(port);
 
   console.log(
-    `\n🚀 API started\n` +
-      `   env:  ${appEnv}\n` +
-      `   port: ${port}\n` +
-      `   url:  http://localhost:${port}/api/v1\n`,
+    `\n🚀 API is live — ready for requests\n` +
+      `   🌍 env:  ${appEnv}\n` +
+      `   🔌 port: ${port}\n` +
+      `   🔗 url:  http://localhost:${port}/api/v1\n`,
   );
 }
 void bootstrap();
