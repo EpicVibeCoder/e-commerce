@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { validateEnv } from './config/env.validation';
 import { join } from 'node:path';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { join } from 'node:path';
       envFilePath: [join(process.cwd(), '../../.env')],
       validate: validateEnv,
     }),
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
