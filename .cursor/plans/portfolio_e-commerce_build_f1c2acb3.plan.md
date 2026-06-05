@@ -102,19 +102,19 @@ flowchart TB
 
 These are **non-negotiable portfolio signals**—weave them in as you go, not only at the end.
 
-| Area              | Standard                                                                                                                                             |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Repo hygiene**  | Conventional commits, PR-sized chunks; each app’s `lint` + `check-types` + `test` + `build` green before merge                                       |
-| **CI**            | GitHub Actions: **separate job per app** (`working-directory: apps/api`, etc.); Postgres service only on API job                                     |
+| Area              | Standard                                                                                                                                              |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Repo hygiene**  | Conventional commits, PR-sized chunks; each app’s `lint` + `check-types` + `test` + `build` green before merge                                        |
+| **CI**            | GitHub Actions: **separate job per app** (`working-directory: apps/api`, etc.); Postgres service only on API job                                      |
 | **Quality gate**  | GitHub Actions per app (`lint`, `check-types`, `test` where defined, `build`)—**no Husky/lint-staged**; run checks locally or rely on CI before merge |
-| **API**           | Versioned prefix `/api/v1`, OpenAPI/Swagger, global validation, consistent error shape, health/ready                                                 |
-| **Security**      | Per-app `.env.example`; env validation in API; bcrypt, JWT, Helmet, CORS allowlist, rate limits, webhook signatures; secrets never in client bundles |
-| **Observability** | Structured logging (Pino) in API, request ID middleware, redact secrets in logs                                                                      |
-| **Data**          | Prisma migrations only under `apps/api/prisma/`, typed enums, indexes, idempotent webhooks, transactional stock updates                              |
-| **Testing**       | Tests live **inside each app**; API: domain units + supertest; frontends: component/e2e as appropriate                                               |
-| **Frontends**     | Accessible UI, loading/error/empty states, responsive layout; **local** components per app (no shared design-system package)                         |
-| **DX**            | README “run locally” lists `cd apps/<app>` steps; root README links to each app’s env vars                                                           |
-| **Deploy**        | API container from `apps/api`; Vercel projects for storefront + admin (separate); public demo URLs + seed credentials                                |
+| **API**           | Versioned prefix `/api/v1`, OpenAPI/Swagger, global validation, consistent error shape, health/ready                                                  |
+| **Security**      | Per-app `.env.example`; env validation in API; bcrypt, JWT, Helmet, CORS allowlist, rate limits, webhook signatures; secrets never in client bundles  |
+| **Observability** | Structured logging (Pino) in API, request ID middleware, redact secrets in logs                                                                       |
+| **Data**          | Prisma migrations only under `apps/api/prisma/`, typed enums, indexes, idempotent webhooks, transactional stock updates                               |
+| **Testing**       | Tests live **inside each app**; API: domain units + supertest; frontends: component/e2e as appropriate                                                |
+| **Frontends**     | Accessible UI, loading/error/empty states, responsive layout; **local** components per app (no shared design-system package)                          |
+| **DX**            | README “run locally” lists `cd apps/<app>` steps; root README links to each app’s env vars                                                            |
+| **Deploy**        | API container from `apps/api`; Vercel projects for storefront + admin (separate); public demo URLs + seed credentials                                 |
 
 **Removed from plan:** monorepo/Turborepo, `packages/*`, `@repo/*` shared packages, assessment submission minimums, bKash comparison table, **Husky/lint-staged** (CI is the pre-merge gate).
 
@@ -124,25 +124,25 @@ These are **non-negotiable portfolio signals**—weave them in as you go, not on
 
 **Goal:** Each app runs cleanly; GitHub looks intentional to a client.
 
-| Task          | Status | Details                                                                                                                                                                          |
-| ------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Schema        | Done   | `apps/api/prisma/schema.prisma`: enums + indexes; initial migration under `prisma/migrations/`                                                                                   |
-| Seed          | Done   | `apps/api/prisma/seed.ts`: `admin@demo.local`, `demo@customer.com`, 3-level categories, 17 products                                                                              |
-| API bootstrap | Done   | [apps/api/src/main.ts](apps/api/src/main.ts): `/api/v1`, `ValidationPipe`, CORS, `PORT` via `ConfigService` + [env.validation.ts](apps/api/src/config/env.validation.ts)       |
-| CI            | Done   | [.github/workflows/ci.yml](.github/workflows/ci.yml): parallel **API** / **Storefront** / **Admin**; Postgres service on API only; `lint:ci` + `check-types` + `test` (API)  |
-| Git hooks     | Skip   | **No Husky/lint-staged** — quality enforced in CI only                                                                                                                           |
-| Env           | Partial| Root [`.env.example`](.env.example) + README (shared root `.env`); `JWT_*` deferred to Phase 1; per-app `.env.example` optional                                                                 |
+| Task          | Status  | Details                                                                                                                                                                     |
+| ------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema        | Done    | `apps/api/prisma/schema.prisma`: enums + indexes; initial migration under `prisma/migrations/`                                                                              |
+| Seed          | Done    | `apps/api/prisma/seed.ts`: `admin@demo.local`, `demo@customer.com`, 3-level categories, 17 products                                                                         |
+| API bootstrap | Done    | [apps/api/src/main.ts](apps/api/src/main.ts): `/api/v1`, `ValidationPipe`, CORS, `PORT` via `ConfigService` + [env.validation.ts](apps/api/src/config/env.validation.ts)    |
+| CI            | Done    | [.github/workflows/ci.yml](.github/workflows/ci.yml): parallel **API** / **Storefront** / **Admin**; Postgres service on API only; `lint:ci` + `check-types` + `test` (API) |
+| Git hooks     | Skip    | **No Husky/lint-staged** — quality enforced in CI only                                                                                                                      |
+| Env           | Partial | Root [`.env.example`](.env.example) + README (shared root `.env`); `JWT_*` deferred to Phase 1; per-app `.env.example` optional                                             |
 
 **Checkpoint:** CI green for all three apps on GitHub Actions; README quick start works (repo uses **root** `.env` + `npm run dev:*`, with per-app commands documented).
 
 ### Phase 0 progress (last updated: 2026-06-03)
 
-| Area | Notes |
-| ---- | ----- |
-| **Done** | Prisma under `apps/api/prisma/`; docker-compose Postgres 18 + Valkey 8; root `package.json` dev/db scripts (no workspaces); API `lint:ci` / `check-types` / `test` / `build`; storefront & admin `check-types` + `build`; ESLint ignores `src/generated/**` |
-| **Verify** | Push/PR to `main` and confirm all three CI jobs pass (Node 24 in Actions; local API needs Node ≥ 24 for `db:generate`) |
-| **Remaining** | Optional: CI badge in README; confirm green Actions run; add `JWT_*` to `.env.example` when starting Phase 1 |
-| **Out of scope** | Husky, lint-staged, per-app `.env.example` files (unless you split env later) |
+| Area             | Notes                                                                                                                                                                                                                                                       |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Done**         | Prisma under `apps/api/prisma/`; docker-compose Postgres 18 + Valkey 8; root `package.json` dev/db scripts (no workspaces); API `lint:ci` / `check-types` / `test` / `build`; storefront & admin `check-types` + `build`; ESLint ignores `src/generated/**` |
+| **Verify**       | Push/PR to `main` and confirm all three CI jobs pass (Node 24 in Actions; local API needs Node ≥ 24 for `db:generate`)                                                                                                                                      |
+| **Remaining**    | Optional: CI badge in README; confirm green Actions run; add `JWT_*` to `.env.example` when starting Phase 1                                                                                                                                                |
+| **Out of scope** | Husky, lint-staged, per-app `.env.example` files (unless you split env later)                                                                                                                                                                               |
 
 ---
 
