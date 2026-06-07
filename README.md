@@ -21,6 +21,14 @@ One root `.env` powers every app. Run commands from the **repository root** unle
 
 ---
 
+## Design & Documentation
+
+Architecture and API onboarding resources are available in the [`docs`](docs) directory:
+- **Entity Relationship Diagram (ERD)**: [`docs/ERD.svg`](docs/ERD.svg) outlines the Postgres database schema and relationships.
+- **Postman API Collection**: [`docs/postman-api-collection.json`](docs/postman-api-collection.json) provides pre-configured requests to test the API endpoints locally.
+
+---
+
 ## Prerequisites
 
 - **Node.js** ≥ 20.19 (24 recommended for Prisma 7)
@@ -79,6 +87,7 @@ Run each command from the **repo root** (`e-commerce/`).
 
 ### 1 · Install dependencies
 
+Install root dependencies:
 ```bash
 npm run install:root
 ```
@@ -158,10 +167,10 @@ npm run dev:storefront
 When the API starts you should see:
 
 ```text
-🚀 API started
-   env:  development
-   port: 3000
-   url:  http://localhost:3000/api/v1
+🚀 API is live — ready for requests
+   🌍 env:  development
+   🔌 port: 3000
+   🔗 url:  http://localhost:3000/api/v1
 ```
 
 ---
