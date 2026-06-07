@@ -1,4 +1,4 @@
-# E-commerce · Full-stack portfolio
+# E-commerce · Full-stack portfolio [![CI](https://github.com/EpicVibeCoder/e-commerce/actions/workflows/ci.yml/badge.svg)](https://github.com/EpicVibeCoder/e-commerce/actions/workflows/ci.yml)
 
 NestJS API · Next.js admin & storefront · Prisma · Postgres · Valkey
 
