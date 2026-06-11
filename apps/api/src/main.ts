@@ -32,9 +32,9 @@ async function bootstrap() {
 
   console.log(
     `\n🚀 API is live — ready for requests\n` +
-      `   🌍 env:  ${appEnv}\n` +
-      `   🔌 port: ${port}\n` +
-      `   🔗 url:  http://localhost:${port}/api/v1\n`,
+      `🌍 env:  ${appEnv}\n` +
+      `🔌 port: ${port}\n` +
+      `🔗 url:  http://localhost:${port}/api/v1\n`,
   );
 }
 void bootstrap();

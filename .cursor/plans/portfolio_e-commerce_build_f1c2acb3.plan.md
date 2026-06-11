@@ -2,42 +2,42 @@
 name: Portfolio e-commerce build
 overview: "Revised phased guide for a client-facing Upwork portfolio showcase: full-stack e-commerce (NestJS API, Next.js storefront + admin, Expo mobile) with Stripe + SSLCommerz, modern engineering standards (CI, tests, observability, polish), and explicit portfolio packaging—not a job assessment submission. Co-located standalone apps only—no monorepo, Turborepo, or shared packages."
 todos:
-      - id: phase-0
-        content: "Phase 0: Schema enums/indexes, seed, API bootstrap, per-app CI jobs, env docs (no Husky — CI only)"
-        status: in_progress
-      - id: phase-1
-        content: "Phase 1: Domain layer in API + auth (JWT, /api/v1, health, Swagger-ready modules)"
-        status: pending
-      - id: phase-2
-        content: "Phase 2: Catalog + admin CRUD, DFS recommendations, Redis category cache"
-        status: pending
-      - id: phase-3
-        content: "Phase 3: Orders (create, list, cancel, transactional totals)"
-        status: pending
-      - id: phase-4
-        content: "Phase 4: Payment strategies (Stripe + SSLCommerz), webhooks, idempotent stock on paid"
-        status: pending
-      - id: phase-5
-        content: "Phase 5: Pino logging, global errors, Helmet, rate limits, full OpenAPI"
-        status: pending
-      - id: phase-6
-        content: "Phase 6: Unit + API + webhook tests; architecture and payment docs"
-        status: pending
-      - id: phase-7
-        content: "Phase 7: Docker API, Vercel frontends, public demo URLs, demo accounts in README"
-        status: pending
-      - id: phase-8
-        content: "Phase 8: Polished storefront (local UI, checkout, UX states)"
-        status: pending
-      - id: phase-9
-        content: "Phase 9: Admin panel (CRUD, orders, dashboard)"
-        status: pending
-      - id: phase-10
-        content: "Phase 10: Expo mobile customer app (standalone)"
-        status: pending
-      - id: phase-11
-        content: "Phase 11: Portfolio packaging (CASE_STUDY.md, README hero, Upwork/Loom assets)"
-        status: pending
+  - id: phase-0
+    content: "Phase 0: Schema enums/indexes, seed, API bootstrap, per-app CI jobs, env docs (no Husky — CI only)"
+    status: in_progress
+  - id: phase-1
+    content: "Phase 1: Domain layer in API + auth (JWT, /api/v1, health, Swagger-ready modules)"
+    status: pending
+  - id: phase-2
+    content: "Phase 2: Catalog + admin CRUD, DFS recommendations, Redis category cache"
+    status: pending
+  - id: phase-3
+    content: "Phase 3: Orders (create, list, cancel, transactional totals)"
+    status: pending
+  - id: phase-4
+    content: "Phase 4: Payment strategies (Stripe + SSLCommerz), webhooks, idempotent stock on paid"
+    status: pending
+  - id: phase-5
+    content: "Phase 5: Pino logging, global errors, Helmet, rate limits, full OpenAPI"
+    status: pending
+  - id: phase-6
+    content: "Phase 6: Unit + API + webhook tests; architecture and payment docs"
+    status: pending
+  - id: phase-7
+    content: "Phase 7: Docker API, Vercel frontends, public demo URLs, demo accounts in README"
+    status: pending
+  - id: phase-8
+    content: "Phase 8: Polished storefront (local UI, checkout, UX states)"
+    status: pending
+  - id: phase-9
+    content: "Phase 9: Admin panel (CRUD, orders, dashboard)"
+    status: pending
+  - id: phase-10
+    content: "Phase 10: Expo mobile customer app (standalone)"
+    status: pending
+  - id: phase-11
+    content: "Phase 11: Portfolio packaging (CASE_STUDY.md, README hero, Upwork/Loom assets)"
+    status: pending
 isProject: false
 ---
 
