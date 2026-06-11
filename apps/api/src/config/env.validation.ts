@@ -1,59 +1,49 @@
-import { plainToInstance } from 'class-transformer';
-import {
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-  MinLength,
-  validateSync,
-} from 'class-validator';
+import { plainToInstance } from "class-transformer";
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min, MinLength, validateSync } from "class-validator";
 
 enum AppEnv {
-  development = 'development',
-  production = 'production',
-  test = 'test',
+      development = "development",
+      production = "production",
+      test = "test",
 }
 
 export class EnvironmentVariables {
-  @IsEnum(AppEnv)
-  APP_ENV!: AppEnv;
+      @IsEnum(AppEnv)
+      APP_ENV!: AppEnv;
 
-  @IsInt()
-  @Min(1)
-  @Max(65535)
-  PORT!: number;
+      @IsInt()
+      @Min(1)
+      @Max(65535)
+      PORT!: number;
 
-  @IsString()
-  @IsNotEmpty()
-  CORS_ORIGINS!: string;
+      @IsString()
+      @IsNotEmpty()
+      CORS_ORIGINS!: string;
 
-  @IsString()
-  @IsNotEmpty()
-  DATABASE_URL!: string;
+      @IsString()
+      @IsNotEmpty()
+      DATABASE_URL!: string;
 
-  @IsOptional()
-  @IsString()
-  REDIS_URL?: string;
+      @IsOptional()
+      @IsString()
+      REDIS_URL?: string;
 
-  @IsString()
-  @IsNotEmpty()
-  JWT_SECRET!: string;
+      @IsString()
+      @IsNotEmpty()
+      JWT_SECRET!: string;
 
-  @IsString()
-  @IsNotEmpty()
-  JWT_EXPIRATION!: string;
+      @IsString()
+      @IsNotEmpty()
+      JWT_EXPIRATION!: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
-  const validated = plainToInstance(EnvironmentVariables, config, {
-    enableImplicitConversion: true,
-  });
-  const errors = validateSync(validated, { skipMissingProperties: false });
-  if (errors.length > 0) {
-    throw new Error(errors.toString());
-  }
-  return validated;
+      const validated = plainToInstance(EnvironmentVariables, config, {
+            enableImplicitConversion: true,
+      });
+      const errors = validateSync(validated, { skipMissingProperties: false });
+      if (errors.length > 0) {
+            throw new Error(errors.toString());
+      }
+      return validated;
 }

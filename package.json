@@ -17,7 +17,8 @@
             "install:admin": "npm install --prefix apps/admin",
             "install:storefront": "npm install --prefix apps/storefront",
             "install:apps": "npm run install:api && npm run install:admin && npm run install:storefront",
-            "install:all": "npm run install:root && npm run install:apps"
+            "install:all": "npm run install:root && npm run install:apps",
+            "format": "prettier --write ."
       },
       "devDependencies": {
             "concurrently": "^9.2.1",

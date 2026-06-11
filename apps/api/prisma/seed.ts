@@ -5,9 +5,7 @@ import { Prisma, PrismaClient, ProductStatus, Role } from "../src/generated/pris
 import { config } from "dotenv";
 import { join } from "node:path";
 
-
 config({ path: join(__dirname, "../../.env") }); // monorepo root .env
-
 
 /** Demo password for local / portfolio reviewers — change in production. */
 export const DEMO_PASSWORD = "DemoPassword123!";
@@ -24,15 +22,7 @@ async function upsertCategory(slug: string, name: string, sortOrder: number, par
       });
 }
 
-async function upsertProduct(data: {
-      sku: string;
-      name: string;
-      description: string;
-      price: string;
-      stock: number;
-      categoryId: string;
-      status?: ProductStatus;
-}) {
+async function upsertProduct(data: { sku: string; name: string; description: string; price: string; stock: number; categoryId: string; status?: ProductStatus }) {
       return prisma.product.upsert({
             where: { sku: data.sku },
             create: {
