@@ -1,11 +1,19 @@
 {
       "name": "e-commerce-root",
       "private": true,
+      "workspaces": [
+            "apps/*"
+      ],
+      "packageManager": "npm@11.12.1",
       "scripts": {
             "dev:api": "dotenv -e .env -- npm run start:dev --prefix apps/api",
             "dev:admin": "dotenv -e .env -- npm run dev --prefix apps/admin",
             "dev:storefront": "dotenv -e .env -- npm run dev --prefix apps/storefront",
-            "dev": "concurrently -k -n API,ADMIN,STOREFRONT -c cyan,magenta,green \"npm run dev:api\" \"npm run dev:admin\" \"npm run dev:storefront\"",
+            "dev": "dotenv -e .env -- turbo run dev start:dev",
+            "build": "turbo run build",
+            "lint:ci": "turbo run lint:ci lint check-types",
+            "check-types": "turbo run check-types",
+            "test": "turbo run test",
             "db:generate": "dotenv -e .env -- npm run db:generate --prefix apps/api",
             "db:migrate": "dotenv -e .env -- npm run db:migrate --prefix apps/api",
             "db:migrate:deploy": "dotenv -e .env -- npm run db:migrate:deploy --prefix apps/api",
@@ -21,8 +29,8 @@
             "format": "prettier --write ."
       },
       "devDependencies": {
-            "concurrently": "^9.2.1",
             "dotenv-cli": "^11.0.0",
-            "prettier": "^3.8.4"
+            "prettier": "^3.8.4",
+            "turbo": "^2.9.18"
       }
 }
