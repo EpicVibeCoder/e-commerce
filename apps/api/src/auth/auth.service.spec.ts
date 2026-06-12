@@ -17,7 +17,6 @@ describe("AuthService", () => {
                                           findUnique: jest.fn(),
                                           create: jest.fn(),
                                     },
-                                    
                               },
                         },
                         {
