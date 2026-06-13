@@ -1,7 +1,7 @@
 import { plainToInstance } from "class-transformer";
 import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min, validateSync } from "class-validator";
 
-enum AppEnv {
+export enum AppEnv {
       development = "development",
       production = "production",
       test = "test",
