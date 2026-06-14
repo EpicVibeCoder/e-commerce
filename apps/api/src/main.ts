@@ -29,7 +29,31 @@ async function bootstrap() {
       if (appEnv !== AppEnv.production) {
             const swaggerConfig = new DocumentBuilder()
                   .setTitle("E-commerce API")
-                  .setDescription("Portfolio e-commerce REST API")
+                  .setDescription(
+                        [
+                              "Portfolio e-commerce REST API.",
+                              "",
+                              "## Authentication",
+                              "Protected routes (users, orders, etc.) require a JWT.",
+                              "They do not show a token field under Parameters — use Authorize instead.",
+                              "",
+                              "### Steps",
+                              "1. POST /api/v1/auth/login — use the Examples dropdown for demo accounts",
+                              "2. Copy accessToken from the response (JWT only, not the whole JSON)",
+                              "3. Click Authorize (lock icon, top right)",
+                              "4. Select access-token and paste the JWT (no Bearer prefix)",
+                              "5. Call protected endpoints, e.g. GET /api/v1/users/me",
+                              "",
+                              "### Demo credentials",
+                              "**Customer**",
+                              "- Email: demo@customer.com",
+                              "- Password: DemoPassword123!",
+                              "",
+                              "**Admin**",
+                              "- Email: admin@demo.local",
+                              "- Password: DemoPassword123!",
+                        ].join("\n"),
+                  )
                   .setVersion("1.0")
                   .addBearerAuth({ type: "http", scheme: "bearer", bearerFormat: "JWT", in: "header" }, "access-token")
                   .build();
