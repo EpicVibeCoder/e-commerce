@@ -1,9 +1,9 @@
 import { Controller, Get, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { UsersService } from "./users.service";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import type { JwtPayload } from "../auth/types/jwt-payload";
+import { CurrentUser } from "src/auth/decorators/current-user.decorator";
+import type { JwtPayload } from "src/auth/types/jwt-payload";
 
 @ApiTags("users")
 @ApiBearerAuth("access-token")

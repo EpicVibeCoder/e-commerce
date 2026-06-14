@@ -1,4 +1,4 @@
-import { Role } from "../generated/prisma/enums.js";
+import { Role } from "src/generated/prisma/enums";
 import { DomainError } from "./domain-error.js";
 import type { UserPersistence } from "./types.js";
 

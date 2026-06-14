@@ -1,4 +1,4 @@
-import { PaymentProvider, PaymentStatus } from "../generated/prisma/enums.js";
+import { PaymentProvider, PaymentStatus } from "src/generated/prisma/enums";
 import { DomainError } from "./domain-error.js";
 import type { PaymentPersistence } from "./types.js";
 

@@ -1,9 +1,9 @@
 import { ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import { Role } from "../generated/prisma/enums.js";
-import { User } from "../domain/user.js";
-import { PrismaService } from "../prisma/prisma.service.js";
+import { Role } from "src/generated/prisma/enums";
+import { User } from "src/domain/user";
+import { PrismaService } from "src/prisma/prisma.service";
 import type { RegisterDto } from "./dto/register.dto.js";
 import type { LoginDto } from "./dto/login.dto.js";
 import type { JwtPayload } from "./types/jwt-payload.js";

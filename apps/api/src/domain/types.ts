@@ -1,4 +1,4 @@
-import type { OrderStatus, PaymentProvider, PaymentStatus, ProductStatus, Role } from "../generated/prisma/enums.js";
+import type { OrderStatus, PaymentProvider, PaymentStatus, ProductStatus, Role } from "src/generated/prisma/enums";
 
 export type UserPersistence = {
       id: string;

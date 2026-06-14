@@ -1,5 +1,5 @@
-import { DomainError } from "./domain-error.js";
-import { Order } from "./order.js";
+import { DomainError } from "src/domain/domain-error";
+import { Order } from "src/domain/order";
 
 describe("Order.calculateTotals", () => {
       it("sums line subtotals into totalAmount", () => {

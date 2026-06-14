@@ -1,4 +1,4 @@
-import { ProductStatus } from "../generated/prisma/enums.js";
+import { ProductStatus } from "src/generated/prisma/enums";
 import { DomainError } from "./domain-error.js";
 import { parseMoney } from "./money.js";
 import type { ProductPersistence } from "./types.js";

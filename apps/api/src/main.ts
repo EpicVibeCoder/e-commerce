@@ -2,7 +2,7 @@ import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { AppEnv, type EnvironmentVariables } from "./config/env.validation";
+import { AppEnv, type EnvironmentVariables } from "src/config/env.validation";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
 async function bootstrap() {

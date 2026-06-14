@@ -1,7 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcrypt";
-import { Prisma, PrismaClient, ProductStatus, Role } from "../src/generated/prisma/client.js";
+import { Prisma, PrismaClient, ProductStatus, Role } from "src/generated/prisma/client.js";
 import { config } from "dotenv";
 import { join } from "node:path";
 

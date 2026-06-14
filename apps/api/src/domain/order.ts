@@ -1,4 +1,4 @@
-import { OrderStatus } from "../generated/prisma/enums.js";
+import { OrderStatus } from "src/generated/prisma/enums";
 import { DomainError } from "./domain-error.js";
 import { OrderItem } from "./order-item.js";
 import { parseMoney, sumMoney } from "./money.js";

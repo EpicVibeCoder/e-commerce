@@ -1,4 +1,4 @@
-import type { Role } from "../../generated/prisma/enums.js";
+import type { Role } from "src/generated/prisma/enums";
 
 export type JwtPayload = {
       sub: string;
