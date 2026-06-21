@@ -1,5 +1,5 @@
 import { plainToInstance } from "class-transformer";
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min, validateSync } from "class-validator";
+import { IsEnum, IsInt, IsNotEmpty, IsString, Max, Min, validateSync } from "class-validator";
 
 export enum AppEnv {
       development = "development",
@@ -24,7 +24,7 @@ export class EnvironmentVariables {
       @IsNotEmpty()
       DATABASE_URL!: string;
 
-      @IsOptional()
+      @IsNotEmpty()
       @IsString()
       REDIS_URL?: string;
 
