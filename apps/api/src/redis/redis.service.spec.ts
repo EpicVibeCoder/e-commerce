@@ -66,9 +66,7 @@ describe("RedisService", () => {
 
             const failingService = failingModule.get(RedisService);
 
-            await expect(failingService.onModuleInit()).rejects.toThrow(
-                  "REDIS_URL is required but not set",
-            );
+            await expect(failingService.onModuleInit()).rejects.toThrow("REDIS_URL is required but not set");
       });
 
       it("gets and sets string values", async () => {

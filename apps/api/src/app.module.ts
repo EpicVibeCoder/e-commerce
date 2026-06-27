@@ -9,6 +9,8 @@ import { AuthModule } from "src/auth/auth.module";
 import { UsersModule } from "src/users/users.module";
 import { HealthModule } from "src/health/health.module";
 import { RedisModule } from "./redis/redis.module";
+import { CategoriesModule } from "./categories/categories.module";
+import { ProductsModule } from "./products/products.module";
 
 @Module({
       imports: [
@@ -22,6 +24,8 @@ import { RedisModule } from "./redis/redis.module";
             UsersModule,
             HealthModule,
             RedisModule,
+            CategoriesModule,
+            ProductsModule,
       ],
       controllers: [AppController],
       providers: [AppService],
