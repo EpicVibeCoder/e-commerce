@@ -8,6 +8,7 @@ const mockRedis = {
       get: jest.fn(),
       set: jest.fn(),
       del: jest.fn(),
+      on: jest.fn(),
 };
 
 jest.mock("ioredis", () => jest.fn().mockImplementation(() => mockRedis));

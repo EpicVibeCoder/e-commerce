@@ -138,28 +138,28 @@ These are **non-negotiable portfolio signals**—weave them in as you go, not on
 | **API**           | Versioned prefix `/api/v1` for REST; GraphQL at `/graphql`; OpenAPI/Swagger; global validation; consistent error shape; health/ready                  |
 | **Observability** | Structured logging (Pino) in API, request ID middleware, redact secrets in logs                                                                       |
 | **Data**          | Prisma migrations only under `apps/api/prisma/`, typed enums, indexes, idempotent webhooks, transactional stock updates                               |
-| **Testing**       | Tests live **inside each app**; API: domain units + supertest + GraphQL resolver tests; frontends: component/e2e as appropriate                         |
+| **Testing**       | Tests live **inside each app**; API: domain units + supertest + GraphQL resolver tests; frontends: component/e2e as appropriate                       |
 | **Frontends**     | Accessible UI, loading/error/empty states, responsive layout; **local** components per app (no shared design-system package)                          |
 | **DX**            | README “run locally” lists `cd apps/<app>` steps; root README links to each app’s env vars                                                            |
 | **Deploy**        | API container from `apps/api`; Vercel projects for storefront + admin (separate); public demo URLs + seed credentials                                 |
 
 ### Identity & security (apply across Phases 1, 3, 4, 5)
 
-| Control                | Where                          | Notes                                                                                                                                      |
-| ---------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Email verification     | Phase 1 schema + Phase 5 flows | **Policy:** login + browse allowed; **checkout/orders blocked** until `emailVerifiedAt` is set                                             |
-| Refresh token rotation | Phase 1                        | `JWT_REFRESH_*` in [`.env.example`](.env.example); store hashed refresh tokens in DB; rotate on use                                        |
-| Password reset         | Phase 5                        | Time-limited single-use tokens via email                                                                                                   |
-| Google OAuth           | Phase 5                        | `GOOGLE_CLIENT_*` already documented; link or create customer accounts; set `emailVerifiedAt` when Google confirms email                   |
-| Password policy        | Phase 1                        | Min length, complexity via DTO + domain `User` rules; bcrypt rounds 12                                                                       |
-| Rate limiting          | Phase 5                        | `@nestjs/throttler` — strict on `/auth/*`, moderate global                                                                                 |
-| Account lockout        | Phase 5                        | Lock after N failed logins (e.g. 5 in 15 min); store `failedLoginAttempts` / `lockedUntil` on User                                         |
-| Helmet + CORS          | Phase 5                        | CORS allowlist in [`main.ts`](apps/api/src/main.ts); add Helmet                                                                            |
-| Webhook signatures     | Phase 4                        | Stripe + SSLCommerz (unchanged)                                                                                                            |
-| Field-level auth       | Phase 2 GraphQL                | `@UseGuards` on resolvers; hide admin fields from public schema                                                                            |
-| GraphQL hardening      | Phase 5                        | Query depth/complexity limits; disable introspection in production                                                                         |
-| Secrets in logs        | Phase 5                        | Pino redaction paths                                                                                                                       |
-| Generic auth errors    | Phase 1                        | “Invalid credentials” — no email enumeration on login                                                                                      |
+| Control                | Where                          | Notes                                                                                                                    |
+| ---------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Email verification     | Phase 1 schema + Phase 5 flows | **Policy:** login + browse allowed; **checkout/orders blocked** until `emailVerifiedAt` is set                           |
+| Refresh token rotation | Phase 1                        | `JWT_REFRESH_*` in [`.env.example`](.env.example); store hashed refresh tokens in DB; rotate on use                      |
+| Password reset         | Phase 5                        | Time-limited single-use tokens via email                                                                                 |
+| Google OAuth           | Phase 5                        | `GOOGLE_CLIENT_*` already documented; link or create customer accounts; set `emailVerifiedAt` when Google confirms email |
+| Password policy        | Phase 1                        | Min length, complexity via DTO + domain `User` rules; bcrypt rounds 12                                                   |
+| Rate limiting          | Phase 5                        | `@nestjs/throttler` — strict on `/auth/*`, moderate global                                                               |
+| Account lockout        | Phase 5                        | Lock after N failed logins (e.g. 5 in 15 min); store `failedLoginAttempts` / `lockedUntil` on User                       |
+| Helmet + CORS          | Phase 5                        | CORS allowlist in [`main.ts`](apps/api/src/main.ts); add Helmet                                                          |
+| Webhook signatures     | Phase 4                        | Stripe + SSLCommerz (unchanged)                                                                                          |
+| Field-level auth       | Phase 2 GraphQL                | `@UseGuards` on resolvers; hide admin fields from public schema                                                          |
+| GraphQL hardening      | Phase 5                        | Query depth/complexity limits; disable introspection in production                                                       |
+| Secrets in logs        | Phase 5                        | Pino redaction paths                                                                                                     |
+| Generic auth errors    | Phase 1                        | “Invalid credentials” — no email enumeration on login                                                                    |
 
 **Email provider:** [Resend](https://resend.com) for production; [Mailpit](https://mailpit.axllent.org/) in Docker for local dev (add to [`docker-compose.yml`](docker-compose.yml) in Phase 5).
 
@@ -198,7 +198,7 @@ PASSWORD_RESET_TOKEN_TTL=1h
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Done**         | Prisma under `apps/api/prisma/`; docker-compose Postgres 18 + Valkey 8; root `package.json` dev/db scripts (no workspaces); API `lint:ci` / `check-types` / `test` / `build`; storefront & admin `check-types` + `build`; ESLint ignores `src/generated/**` |
 | **Verify**       | Push/PR to `main` and confirm all three CI jobs pass (Node 24 in Actions; local API needs Node ≥ 24 for `db:generate`)                                                                                                                                      |
-| **Remaining**    | Optional: CI badge in README; confirm green Actions run; add `JWT_*` + email env placeholders to `.env.example` when starting Phase 1                                                                                                                         |
+| **Remaining**    | Optional: CI badge in README; confirm green Actions run; add `JWT_*` + email env placeholders to `.env.example` when starting Phase 1                                                                                                                       |
 | **Out of scope** | Husky, lint-staged, per-app `.env.example` files (unless you split env later); Mailpit (Phase 5)                                                                                                                                                            |
 
 ---
@@ -288,13 +288,10 @@ enum AuthTokenType {
 
 ```graphql
 type Query {
-  products(
-    filter: ProductFilterInput
-    pagination: PaginationInput
-  ): ProductConnection!
-  product(id: ID, slug: String): Product
-  categoryTree: [Category!]!
-  recommendations(productId: ID!, limit: Int = 8): [Product!]!
+      products(filter: ProductFilterInput, pagination: PaginationInput): ProductConnection!
+      product(id: ID, slug: String): Product
+      categoryTree: [Category!]!
+      recommendations(productId: ID!, limit: Int = 8): [Product!]!
 }
 ```
 
@@ -396,14 +393,14 @@ interface PaymentStrategy {
 
 **Goal:** Give clients a **link**, not “clone and run.”
 
-| Item          | Approach                                                                           |
-| ------------- | ---------------------------------------------------------------------------------- |
-| API           | `apps/api/Dockerfile` (multi-stage); compose stacks api + postgres + valkey        |
+| Item          | Approach                                                                                       |
+| ------------- | ---------------------------------------------------------------------------------------------- |
+| API           | `apps/api/Dockerfile` (multi-stage); compose stacks api + postgres + valkey                    |
 | Storefront    | Separate Vercel project → `apps/storefront`, `NEXT_PUBLIC_API_URL` + `NEXT_PUBLIC_GRAPHQL_URL` |
 | Admin         | Separate Vercel project → `apps/admin`, `NEXT_PUBLIC_API_URL` + `NEXT_PUBLIC_GRAPHQL_URL`      |
-| Webhooks      | Stable API URL (Railway/Fly.io/Render); document Stripe/SSLCommerz dashboard setup |
-| Email         | Resend with verified domain; document `EMAIL_FROM` and `APP_URL` for production links |
-| Demo accounts | README: `demo@customer.com` / `admin@...` + test card instructions                 |
+| Webhooks      | Stable API URL (Railway/Fly.io/Render); document Stripe/SSLCommerz dashboard setup             |
+| Email         | Resend with verified domain; document `EMAIL_FROM` and `APP_URL` for production links          |
+| Demo accounts | README: `demo@customer.com` / `admin@...` + test card instructions                             |
 
 **Checkpoint:** Public URLs work; optional GIF walkthrough for Upwork profile.
 
@@ -418,9 +415,9 @@ interface PaymentStrategy {
 - **UX:** skeletons, toasts, 404/empty states, mobile-responsive
 - **Unverified user UX:** banner prompting email verification; `/verify-email`, `/forgot-password`, `/reset-password` pages
 - **Data:**
-  - **GraphQL** (Apollo Client or urql): home, catalog, product detail, recommendations, order history
-  - **REST** (OpenAPI-generated or hand-written client): auth, cart mutations, checkout, payment redirects
-  - Env: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_GRAPHQL_URL`
+     - **GraphQL** (Apollo Client or urql): home, catalog, product detail, recommendations, order history
+     - **REST** (OpenAPI-generated or hand-written client): auth, cart mutations, checkout, payment redirects
+     - Env: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_GRAPHQL_URL`
 
 **Checkpoint:** Client can complete purchase on production demo URL; unverified user sees browse-but-not-checkout flow.
 
@@ -432,8 +429,8 @@ interface PaymentStrategy {
 - Admin auth, product CRUD, order/payment list, simple dashboard metrics
 - Polished tables, filters, confirm dialogs for destructive actions
 - **Data:**
-  - **GraphQL:** order detail, dashboard metrics, order list with nested user/items/payments
-  - **REST:** product/category CRUD, destructive actions (OpenAPI client — no shared package)
+     - **GraphQL:** order detail, dashboard metrics, order list with nested user/items/payments
+     - **REST:** product/category CRUD, destructive actions (OpenAPI client — no shared package)
 - Show customer email verification status on order views where relevant
 
 **Checkpoint:** Admin change reflects on storefront within seconds.

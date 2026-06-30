@@ -176,14 +176,7 @@ export class CategoriesService {
             await this.redis.del(REDIS_KEYS.categoryTree);
       }
 
-      private toResponse(category: {
-            id: string;
-            name: string;
-            slug: string;
-            parentId: string | null;
-            sortOrder: number;
-            _count: { products: number; children: number };
-      }) {
+      private toResponse(category: { id: string; name: string; slug: string; parentId: string | null; sortOrder: number; _count: { products: number; children: number } }) {
             return {
                   id: category.id,
                   name: category.name,

@@ -37,4 +37,3 @@ export class CreateProductDto {
       @IsString()
       categoryId!: string;
 }
-
