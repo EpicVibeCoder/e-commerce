@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { RedisService } from "src/redis/redis.service";
-import { REDIS_KEYS } from "src/redis/redis-keys";
+import { REDIS_KEYS, REDIS_TTL_SECONDS } from "src/redis/redis-keys";
 import type { CreateCategoryDto } from "./dto/create-category.dto.js";
 import type { UpdateCategoryDto } from "./dto/update-category.dto.js";
 
@@ -13,12 +13,45 @@ type CategoryRecord = {
       sortOrder: number;
 };
 
+type CategoryWithCounts = CategoryRecord & {
+      _count: {
+            products: number;
+            children: number;
+      };
+};
+
+export type CategoryTreeNode = {
+      id: string;
+      name: string;
+      slug: string;
+      parentId: string | null;
+      sortOrder: number;
+      productCount: number;
+      childCount: number;
+      children: CategoryTreeNode[];
+};
+
 @Injectable()
 export class CategoriesService {
       constructor(
             private readonly prisma: PrismaService,
             private readonly redis: RedisService,
       ) {}
+
+      private buildTree(categories: CategoryWithCounts[]): CategoryTreeNode[] {
+            const childrenByParent = new Map<string | null, CategoryWithCounts[]>();
+            for (const category of categories) {
+                  const siblings = childrenByParent.get(category.parentId) ?? [];
+                  siblings.push(category);
+                  childrenByParent.set(category.parentId, siblings);
+            }
+            const visit = (parentId: string | null): CategoryTreeNode[] =>
+                  (childrenByParent.get(parentId) ?? []).map((category) => ({
+                        ...this.toResponse(category),
+                        children: visit(category.id),
+                  }));
+            return visit(null);
+      }
 
       async findAll() {
             const categories = await this.prisma.category.findMany({
@@ -29,6 +62,22 @@ export class CategoriesService {
             });
 
             return categories.map((category) => this.toResponse(category));
+      }
+
+      async getTree(): Promise<CategoryTreeNode[]> {
+            const cached = await this.redis.getJson<CategoryTreeNode[]>(REDIS_KEYS.categoryTree);
+            if (cached !== null) {
+                  return cached;
+            }
+            const categories = await this.prisma.category.findMany({
+                  orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+                  include: {
+                        _count: { select: { products: true, children: true } },
+                  },
+            });
+            const tree = this.buildTree(categories);
+            await this.redis.setJson(REDIS_KEYS.categoryTree, tree, REDIS_TTL_SECONDS.categoryTree);
+            return tree;
       }
 
       async findOne(id: string) {
