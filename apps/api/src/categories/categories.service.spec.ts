@@ -20,7 +20,7 @@ describe("CategoriesService", () => {
             del: jest.fn(),
       };
       beforeEach(async () => {
-            jest.clearAllMocks();
+            jest.resetAllMocks();
             const module: TestingModule = await Test.createTestingModule({
                   providers: [
                         CategoriesService,
