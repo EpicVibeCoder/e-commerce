@@ -376,14 +376,15 @@ interface PaymentStrategy {
 **Tests (all under `apps/api` unless noted):** domain units, API integration (auth, orders, payments), webhook fixtures with mocked providers. **New:** auth tests (verification token expiry, refresh rotation, lockout, `EmailVerifiedGuard`); GraphQL resolver integration + DataLoader batching; mail mock transport in CI (no real sends). Frontends: add tests in their own folders when UI grows.
 
 **Docs (client-facing quality):**
-| Doc | Path |
-|-----|------|
-| Architecture | `docs/architecture.md` — hybrid REST/GraphQL diagram |
-| ERD | `docs/ERD.svg` |
-| API | Swagger + exported Postman collection |
+
+| Doc             | Path                                                                   |
+| --------------- | ---------------------------------------------------------------------- |
+| Architecture    | `docs/architecture.md` — hybrid REST/GraphQL diagram                   |
+| ERD             | `docs/ERD.svg`                                                         |
+| API             | Swagger + exported Postman collection                                  |
 | Auth & security | `docs/security/auth-flows.md` — verify, reset, OAuth sequence diagrams |
-| GraphQL | `docs/graphql.md` — queries, auth header, playground |
-| Payments | `docs/payments/stripe.md`, `docs/payments/sslcommerz.md` |
+| GraphQL         | `docs/graphql.md` — queries, auth header, playground                   |
+| Payments        | `docs/payments/stripe.md`, `docs/payments/sslcommerz.md`               |
 
 **Checkpoint:** CI runs API tests; README links to docs and live demo (when Phase 7 done).
 

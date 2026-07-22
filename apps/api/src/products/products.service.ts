@@ -92,7 +92,7 @@ export class ProductsService {
             return this.toResponse(product);
       }
 
-      async recommendations(productId: string, limit = 8): Promise<ProductResponse[]>   {
+      async recommendations(productId: string, limit = 8): Promise<ProductResponse[]> {
             const source = await this.prisma.product.findUnique({
                   where: { id: productId },
                   select: { id: true, categoryId: true },
@@ -117,7 +117,7 @@ export class ProductsService {
             });
             return products.map((product) => this.toResponse(product));
       }
-      
+
       async create(dto: CreateProductDto) {
             const sku = dto.sku.trim().toUpperCase();
 
