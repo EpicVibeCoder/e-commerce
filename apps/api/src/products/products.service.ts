@@ -8,6 +8,20 @@ import type { CreateProductDto } from "./dto/create-product.dto.js";
 import type { UpdateProductDto } from "./dto/update-product.dto.js";
 import type { ListProductsQueryDto } from "./dto/list-products.dto.js";
 
+type ProductResponse = {
+      id: string;
+      name: string;
+      sku: string;
+      description: string | null;
+      price: string;
+      stock: number;
+      status: ProductStatus;
+      categoryId: string;
+      category: { id: string; name: string; slug: string };
+      createdAt: Date;
+      updatedAt: Date;
+};
+
 @Injectable()
 export class ProductsService {
       constructor(private readonly prisma: PrismaService) {}
@@ -78,6 +92,32 @@ export class ProductsService {
             return this.toResponse(product);
       }
 
+      async recommendations(productId: string, limit = 8): Promise<ProductResponse[]>   {
+            const source = await this.prisma.product.findUnique({
+                  where: { id: productId },
+                  select: { id: true, categoryId: true },
+            });
+            if (!source) {
+                  throw new NotFoundException("Product not found");
+            }
+            const take = Math.min(Math.max(limit, 1), 20);
+            const products = await this.prisma.product.findMany({
+                  where: {
+                        categoryId: source.categoryId,
+                        status: ProductStatus.active,
+                        id: { not: productId },
+                  },
+                  take,
+                  orderBy: { createdAt: "desc" },
+                  include: {
+                        category: {
+                              select: { id: true, name: true, slug: true },
+                        },
+                  },
+            });
+            return products.map((product) => this.toResponse(product));
+      }
+      
       async create(dto: CreateProductDto) {
             const sku = dto.sku.trim().toUpperCase();
 
