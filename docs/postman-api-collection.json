@@ -319,7 +319,7 @@
                               }
                         },
                         {
-                              "name": "Login Successful - Customer",
+                              "name": "Login Successful - Registered Customer",
                               "event": [
                                     {
                                           "listen": "test",
@@ -332,6 +332,57 @@
                                                       "    var jsonData = pm.response.json();",
                                                       "    pm.expect(jsonData).to.have.property(\"accessToken\");",
                                                       "    pm.expect(jsonData).to.have.property(\"user\");",
+                                                      "    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get(\"registerEmail\"));",
+                                                      "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"email\": \"{{registerEmail}}\",\n  \"password\": \"Password123!\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/login",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "login"
+                                          ]
+                                    },
+                                    "description": "Logs in the user registered in the first step using saved credentials."
+                              }
+                        },
+                        {
+                              "name": "Login Successful - Demo Customer",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Response contains accessToken and user details\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"accessToken\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"user\");",
+                                                      "    pm.expect(jsonData.user.email).to.eql(\"demo@customer.com\");",
                                                       "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
                                                       "});"
                                                 ],
@@ -364,11 +415,11 @@
                                                 "login"
                                           ]
                                     },
-                                    "description": "Logs in demo customer user and saves accessToken."
+                                    "description": "Logs in seeded demo customer user and saves accessToken."
                               }
                         },
                         {
-                              "name": "Login Successful - Admin",
+                              "name": "Login Successful - Demo Admin",
                               "event": [
                                     {
                                           "listen": "test",
@@ -448,7 +499,7 @@
                                     ],
                                     "body": {
                                           "mode": "raw",
-                                          "raw": "{\n  \"email\": \"demo@customer.com\",\n  \"password\": \"WrongPassword!\"\n}"
+                                          "raw": "{\n  \"email\": \"{{registerEmail}}\",\n  \"password\": \"WrongPassword!\"\n}"
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
@@ -462,7 +513,7 @@
                                                 "login"
                                           ]
                                     },
-                                    "description": "Attempts to login with correct email but incorrect password, expecting a 401 Unauthorized error."
+                                    "description": "Attempts to login with registered email but incorrect password, expecting a 401 Unauthorized error."
                               }
                         },
                         {
