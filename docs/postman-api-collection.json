@@ -1,7 +1,7 @@
 {
       "info": {
             "name": "E-commerce API",
-            "description": "Collection to test the NestJS API locally.",
+            "description": "Collection to test the NestJS API endpoints locally.",
             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
       },
       "variable": [
@@ -16,37 +16,97 @@
             {
                   "key": "accessToken",
                   "value": ""
+            },
+            {
+                  "key": "adminAccessToken",
+                  "value": ""
+            },
+            {
+                  "key": "categoryId",
+                  "value": ""
+            },
+            {
+                  "key": "productId",
+                  "value": ""
             }
       ],
       "item": [
             {
-                  "name": "Root",
-                  "event": [
+                  "name": "Root & Health",
+                  "item": [
                         {
-                              "listen": "test",
-                              "script": {
-                                    "exec": [
-                                          "pm.test(\"Status code is 200\", function () {",
-                                          "    pm.response.to.have.status(200);",
-                                          "});",
-                                          "pm.test(\"Response is 'Hello World!'\", function () {",
-                                          "    pm.response.to.have.text(\"Hello World!\");",
-                                          "});"
-                                    ],
-                                    "type": "text/javascript"
+                              "name": "Root",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Response is 'Hello World!'\", function () {",
+                                                      "    pm.response.to.have.text(\"Hello World!\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1"
+                                          ]
+                                    },
+                                    "description": "GET root – returns Hello World"
+                              }
+                        },
+                        {
+                              "name": "Health Ready",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"API is ready and database is up\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.status).to.eql(\"ready\");",
+                                                      "    pm.expect(jsonData.database).to.eql(\"up\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/health/ready",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "health",
+                                                "ready"
+                                          ]
+                                    },
+                                    "description": "Checks health status and database connectivity of the API."
                               }
                         }
-                  ],
-                  "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                              "raw": "{{baseUrl}}/api/v1",
-                              "host": ["{{baseUrl}}"],
-                              "path": ["api", "v1"]
-                        },
-                        "description": "GET root – returns Hello World"
-                  }
+                  ]
             },
             {
                   "name": "Auth",
@@ -57,7 +117,11 @@
                                     {
                                           "listen": "prerequest",
                                           "script": {
-                                                "exec": ["const randomSuffix = Math.floor(Math.random() * 1000000);", "const randomEmail = `user_${randomSuffix}@example.com`;", "pm.collectionVariables.set(\"registerEmail\", randomEmail);"],
+                                                "exec": [
+                                                      "const randomSuffix = Math.floor(Math.random() * 1000000);",
+                                                      "const randomEmail = `user_${randomSuffix}@example.com`;",
+                                                      "pm.collectionVariables.set(\"registerEmail\", randomEmail);"
+                                                ],
                                                 "type": "text/javascript"
                                           }
                                     },
@@ -97,8 +161,15 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/register",
-                                          "host": ["{{baseUrl}}"],
-                                          "path": ["api", "v1", "auth", "register"]
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "register"
+                                          ]
                                     },
                                     "description": "Registers a new user with a dynamically generated random email."
                               }
@@ -138,8 +209,15 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/register",
-                                          "host": ["{{baseUrl}}"],
-                                          "path": ["api", "v1", "auth", "register"]
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "register"
+                                          ]
                                     },
                                     "description": "Attempts to register a user with an already registered email, expecting a 409 Conflict error."
                               }
@@ -179,8 +257,15 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/register",
-                                          "host": ["{{baseUrl}}"],
-                                          "path": ["api", "v1", "auth", "register"]
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "register"
+                                          ]
                                     },
                                     "description": "Attempts to register with an invalid email format, expecting a 400 Bad Request error."
                               }
@@ -220,14 +305,21 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/register",
-                                          "host": ["{{baseUrl}}"],
-                                          "path": ["api", "v1", "auth", "register"]
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "register"
+                                          ]
                                     },
                                     "description": "Attempts to register with a password shorter than 8 characters, expecting a 400 Bad Request error."
                               }
                         },
                         {
-                              "name": "Login Successful",
+                              "name": "Login Successful - Customer",
                               "event": [
                                     {
                                           "listen": "test",
@@ -240,7 +332,6 @@
                                                       "    var jsonData = pm.response.json();",
                                                       "    pm.expect(jsonData).to.have.property(\"accessToken\");",
                                                       "    pm.expect(jsonData).to.have.property(\"user\");",
-                                                      "    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get(\"registerEmail\"));",
                                                       "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
                                                       "});"
                                                 ],
@@ -259,14 +350,71 @@
                                     ],
                                     "body": {
                                           "mode": "raw",
-                                          "raw": "{\n  \"email\": \"{{registerEmail}}\",\n  \"password\": \"Password123!\"\n}"
+                                          "raw": "{\n  \"email\": \"demo@customer.com\",\n  \"password\": \"DemoPassword123!\"\n}"
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": ["{{baseUrl}}"],
-                                          "path": ["api", "v1", "auth", "login"]
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "login"
+                                          ]
                                     },
-                                    "description": "Logs in the user registered in the first step using saved credentials."
+                                    "description": "Logs in demo customer user and saves accessToken."
+                              }
+                        },
+                        {
+                              "name": "Login Successful - Admin",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Response contains accessToken for admin\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"accessToken\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"user\");",
+                                                      "    pm.expect(jsonData.user.role).to.eql(\"admin\");",
+                                                      "    pm.collectionVariables.set(\"adminAccessToken\", jsonData.accessToken);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"email\": \"admin@demo.local\",\n  \"password\": \"DemoPassword123!\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/login",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "login"
+                                          ]
+                                    },
+                                    "description": "Logs in demo admin user and saves adminAccessToken."
                               }
                         },
                         {
@@ -300,14 +448,21 @@
                                     ],
                                     "body": {
                                           "mode": "raw",
-                                          "raw": "{\n  \"email\": \"{{registerEmail}}\",\n  \"password\": \"WrongPassword!\"\n}"
+                                          "raw": "{\n  \"email\": \"demo@customer.com\",\n  \"password\": \"WrongPassword!\"\n}"
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": ["{{baseUrl}}"],
-                                          "path": ["api", "v1", "auth", "login"]
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "login"
+                                          ]
                                     },
-                                    "description": "Attempts to login with a correct email but incorrect password, expecting a 401 Unauthorized error."
+                                    "description": "Attempts to login with correct email but incorrect password, expecting a 401 Unauthorized error."
                               }
                         },
                         {
@@ -345,10 +500,17 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": ["{{baseUrl}}"],
-                                          "path": ["api", "v1", "auth", "login"]
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "login"
+                                          ]
                                     },
-                                    "description": "Attempts to login with an email that is not registered, expecting a 401 Unauthorized error."
+                                    "description": "Attempts to login with an unregistered email, expecting a 401 Unauthorized error."
                               }
                         },
                         {
@@ -386,10 +548,782 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": ["{{baseUrl}}"],
-                                          "path": ["api", "v1", "auth", "login"]
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "auth",
+                                                "login"
+                                          ]
                                     },
                                     "description": "Attempts to login with an invalid email format, expecting a 400 Bad Request error."
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Users",
+                  "item": [
+                        {
+                              "name": "Get Current User Profile",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Returns current user profile\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"id\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"email\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"role\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/users/me",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "users",
+                                                "me"
+                                          ]
+                                    },
+                                    "description": "Gets current authenticated user profile using Bearer JWT."
+                              }
+                        },
+                        {
+                              "name": "Get Current User Profile - Unauthorized",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 401\", function () {",
+                                                      "    pm.response.to.have.status(401);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/users/me",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "users",
+                                                "me"
+                                          ]
+                                    },
+                                    "description": "Attempts to access user profile without JWT token, expecting 401 Unauthorized."
+                              }
+                        },
+                        {
+                              "name": "Get Current User Orders",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Returns user orders array\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.be.an(\"array\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/users/me/orders",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "users",
+                                                "me",
+                                                "orders"
+                                          ]
+                                    },
+                                    "description": "Gets current user's order history."
+                              }
+                        },
+                        {
+                              "name": "Get Current User Payments",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Returns user payments array\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.be.an(\"array\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/users/me/payments",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "users",
+                                                "me",
+                                                "payments"
+                                          ]
+                                    },
+                                    "description": "Gets current user's payment records."
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Categories",
+                  "item": [
+                        {
+                              "name": "Create Category",
+                              "event": [
+                                    {
+                                          "listen": "prerequest",
+                                          "script": {
+                                                "exec": [
+                                                      "const randomId = Math.floor(Math.random() * 1000000);",
+                                                      "pm.collectionVariables.set(\"tempCategorySlug\", `wearables-${randomId}`);"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    },
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Response contains created category details\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"id\");",
+                                                      "    pm.expect(jsonData.name).to.eql(\"Wearables\");",
+                                                      "    pm.collectionVariables.set(\"categoryId\", jsonData.id);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Wearables\",\n  \"slug\": \"{{tempCategorySlug}}\",\n  \"sortOrder\": 1\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "categories"
+                                          ]
+                                    },
+                                    "description": "Creates a new category (admin required)."
+                              }
+                        },
+                        {
+                              "name": "List Categories",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Returns list of categories\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.be.an(\"array\");",
+                                                      "    if (jsonData.length > 0 && !pm.collectionVariables.get(\"categoryId\")) {",
+                                                      "        pm.collectionVariables.set(\"categoryId\", jsonData[0].id);",
+                                                      "    }",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "categories"
+                                          ]
+                                    },
+                                    "description": "Lists all categories (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Get Category by ID",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Category ID matches request\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"categoryId\"));",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "categories",
+                                                "{{categoryId}}"
+                                          ]
+                                    },
+                                    "description": "Gets category details by ID (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Update Category",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Category updated successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.name).to.eql(\"Smart Wearables\");",
+                                                      "    pm.expect(jsonData.sortOrder).to.eql(5);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "PATCH",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Smart Wearables\",\n  \"sortOrder\": 5\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "categories",
+                                                "{{categoryId}}"
+                                          ]
+                                    },
+                                    "description": "Updates an existing category by ID (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Categories Error - Forbidden for Non-Admin",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 403\", function () {",
+                                                      "    pm.response.to.have.status(403);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "categories"
+                                          ]
+                                    },
+                                    "description": "Attempts to access categories with customer token, expecting 403 Forbidden."
+                              }
+                        },
+                        {
+                              "name": "Delete Category",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Category deleted response is valid\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.deleted).to.eql(true);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "categories",
+                                                "{{categoryId}}"
+                                          ]
+                                    },
+                                    "description": "Deletes a category by ID (admin required)."
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Products",
+                  "item": [
+                        {
+                              "name": "Create Product",
+                              "event": [
+                                    {
+                                          "listen": "prerequest",
+                                          "script": {
+                                                "exec": [
+                                                      "const randomId = Math.floor(Math.random() * 1000000);",
+                                                      "pm.collectionVariables.set(\"tempProductSku\", `MOUSE-${randomId}`);"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    },
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Response contains created product details\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"id\");",
+                                                      "    pm.expect(jsonData.name).to.eql(\"Wireless Ergonomic Mouse\");",
+                                                      "    pm.collectionVariables.set(\"productId\", jsonData.id);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Wireless Ergonomic Mouse\",\n  \"sku\": \"{{tempProductSku}}\",\n  \"description\": \"High precision optical wireless mouse\",\n  \"price\": \"49.99\",\n  \"stock\": 100,\n  \"status\": \"active\",\n  \"categoryId\": \"{{categoryId}}\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "products"
+                                          ]
+                                    },
+                                    "description": "Creates a new product (admin required)."
+                              }
+                        },
+                        {
+                              "name": "List Products",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Returns paginated products response\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"data\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"meta\");",
+                                                      "    pm.expect(jsonData.data).to.be.an(\"array\");",
+                                                      "    if (jsonData.data.length > 0 && !pm.collectionVariables.get(\"productId\")) {",
+                                                      "        pm.collectionVariables.set(\"productId\", jsonData.data[0].id);",
+                                                      "    }",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products?page=1&limit=10",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "products"
+                                          ],
+                                          "query": [
+                                                {
+                                                      "key": "page",
+                                                      "value": "1"
+                                                },
+                                                {
+                                                      "key": "limit",
+                                                      "value": "10"
+                                                }
+                                          ]
+                                    },
+                                    "description": "Lists products with pagination and filters (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Get Product by ID",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Product ID matches request\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"productId\"));",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "products",
+                                                "{{productId}}"
+                                          ]
+                                    },
+                                    "description": "Gets product details by ID (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Update Product",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Product updated successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.name).to.eql(\"Updated Wireless Mouse\");",
+                                                      "    pm.expect(jsonData.price).to.eql(\"39.99\");",
+                                                      "    pm.expect(jsonData.stock).to.eql(80);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "PATCH",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Updated Wireless Mouse\",\n  \"price\": \"39.99\",\n  \"stock\": 80\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "products",
+                                                "{{productId}}"
+                                          ]
+                                    },
+                                    "description": "Updates an existing product by ID (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Products Error - Forbidden for Non-Admin",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 403\", function () {",
+                                                      "    pm.response.to.have.status(403);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "products"
+                                          ]
+                                    },
+                                    "description": "Attempts to access products with customer token, expecting 403 Forbidden."
+                              }
+                        },
+                        {
+                              "name": "Delete Product",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Product deleted or archived successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"id\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"deleted\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+                                          "host": [
+                                                "{{baseUrl}}"
+                                          ],
+                                          "path": [
+                                                "api",
+                                                "v1",
+                                                "products",
+                                                "{{productId}}"
+                                          ]
+                                    },
+                                    "description": "Deletes or archives a product by ID (admin required)."
                               }
                         }
                   ]
