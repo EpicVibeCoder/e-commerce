@@ -44,8 +44,8 @@
                                                       "pm.test(\"Status code is 200\", function () {",
                                                       "    pm.response.to.have.status(200);",
                                                       "});",
-                                                      "pm.test(\"Response is 'Hello World!'\", function () {",
-                                                      "    pm.response.to.have.text(\"Hello World!\");",
+                                                      "pm.test(\"Response is 'The API is running'\", function () {",
+                                                      "    pm.expect(pm.response.text()).to.eql(\"The API is running\");",
                                                       "});"
                                                 ],
                                                 "type": "text/javascript"
@@ -57,15 +57,10 @@
                                     "header": [],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1"]
                                     },
-                                    "description": "GET root – returns Hello World"
+                                    "description": "GET root – returns status message"
                               }
                         },
                         {
@@ -93,15 +88,8 @@
                                     "header": [],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/health/ready",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "health",
-                                                "ready"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "health", "ready"]
                                     },
                                     "description": "Checks health status and database connectivity of the API."
                               }
@@ -117,11 +105,7 @@
                                     {
                                           "listen": "prerequest",
                                           "script": {
-                                                "exec": [
-                                                      "const randomSuffix = Math.floor(Math.random() * 1000000);",
-                                                      "const randomEmail = `user_${randomSuffix}@example.com`;",
-                                                      "pm.collectionVariables.set(\"registerEmail\", randomEmail);"
-                                                ],
+                                                "exec": ["const randomSuffix = Math.floor(Math.random() * 1000000);", "const randomEmail = `user_${randomSuffix}@example.com`;", "pm.collectionVariables.set(\"registerEmail\", randomEmail);"],
                                                 "type": "text/javascript"
                                           }
                                     },
@@ -161,15 +145,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/register",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "register"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "register"]
                                     },
                                     "description": "Registers a new user with a dynamically generated random email."
                               }
@@ -209,15 +186,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/register",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "register"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "register"]
                                     },
                                     "description": "Attempts to register a user with an already registered email, expecting a 409 Conflict error."
                               }
@@ -257,15 +227,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/register",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "register"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "register"]
                                     },
                                     "description": "Attempts to register with an invalid email format, expecting a 400 Bad Request error."
                               }
@@ -305,15 +268,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/register",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "register"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "register"]
                                     },
                                     "description": "Attempts to register with a password shorter than 8 characters, expecting a 400 Bad Request error."
                               }
@@ -355,15 +311,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "login"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "login"]
                                     },
                                     "description": "Logs in the user registered in the first step using saved credentials."
                               }
@@ -405,15 +354,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "login"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "login"]
                                     },
                                     "description": "Logs in seeded demo customer user and saves accessToken."
                               }
@@ -455,15 +397,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "login"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "login"]
                                     },
                                     "description": "Logs in demo admin user and saves adminAccessToken."
                               }
@@ -503,15 +438,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "login"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "login"]
                                     },
                                     "description": "Attempts to login with registered email but incorrect password, expecting a 401 Unauthorized error."
                               }
@@ -551,15 +479,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "login"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "login"]
                                     },
                                     "description": "Attempts to login with an unregistered email, expecting a 401 Unauthorized error."
                               }
@@ -599,15 +520,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/auth/login",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "auth",
-                                                "login"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "login"]
                                     },
                                     "description": "Attempts to login with an invalid email format, expecting a 400 Bad Request error."
                               }
@@ -649,15 +563,8 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/users/me",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "users",
-                                                "me"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "users", "me"]
                                     },
                                     "description": "Gets current authenticated user profile using Bearer JWT."
                               }
@@ -668,11 +575,7 @@
                                     {
                                           "listen": "test",
                                           "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 401\", function () {",
-                                                      "    pm.response.to.have.status(401);",
-                                                      "});"
-                                                ],
+                                                "exec": ["pm.test(\"Status code is 401\", function () {", "    pm.response.to.have.status(401);", "});"],
                                                 "type": "text/javascript"
                                           }
                                     }
@@ -682,15 +585,8 @@
                                     "header": [],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/users/me",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "users",
-                                                "me"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "users", "me"]
                                     },
                                     "description": "Attempts to access user profile without JWT token, expecting 401 Unauthorized."
                               }
@@ -725,16 +621,8 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/users/me/orders",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "users",
-                                                "me",
-                                                "orders"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "users", "me", "orders"]
                                     },
                                     "description": "Gets current user's order history."
                               }
@@ -769,16 +657,8 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/users/me/payments",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "users",
-                                                "me",
-                                                "payments"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "users", "me", "payments"]
                                     },
                                     "description": "Gets current user's payment records."
                               }
@@ -794,10 +674,7 @@
                                     {
                                           "listen": "prerequest",
                                           "script": {
-                                                "exec": [
-                                                      "const randomId = Math.floor(Math.random() * 1000000);",
-                                                      "pm.collectionVariables.set(\"tempCategorySlug\", `wearables-${randomId}`);"
-                                                ],
+                                                "exec": ["const randomId = Math.floor(Math.random() * 1000000);", "pm.collectionVariables.set(\"tempCategorySlug\", `wearables-${randomId}`);"],
                                                 "type": "text/javascript"
                                           }
                                     },
@@ -839,16 +716,55 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/categories",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "categories"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories"]
                                     },
                                     "description": "Creates a new category (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Create Category Error - Invalid Slug Format",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 400\", function () {",
+                                                      "    pm.response.to.have.status(400);",
+                                                      "});",
+                                                      "pm.test(\"Validation error states slug format requirement\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.be.an(\"array\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Invalid Category\",\n  \"slug\": \"Invalid Slug Format!\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories"]
+                                    },
+                                    "description": "Attempts to create a category with an invalid slug format, expecting 400 Bad Request."
                               }
                         },
                         {
@@ -884,14 +800,8 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/categories",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "categories"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories"]
                                     },
                                     "description": "Lists all categories (admin required)."
                               }
@@ -926,17 +836,46 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "categories",
-                                                "{{categoryId}}"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories", "{{categoryId}}"]
                                     },
                                     "description": "Gets category details by ID (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Get Category Error - Not Found",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 404\", function () {",
+                                                      "    pm.response.to.have.status(404);",
+                                                      "});",
+                                                      "pm.test(\"Error message is 'Category not found'\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.eql(\"Category not found\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories/nonexistent-category-id",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories", "nonexistent-category-id"]
+                                    },
+                                    "description": "Attempts to get a non-existent category by ID, expecting 404 Not Found."
                               }
                         },
                         {
@@ -979,15 +918,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "categories",
-                                                "{{categoryId}}"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories", "{{categoryId}}"]
                                     },
                                     "description": "Updates an existing category by ID (admin required)."
                               }
@@ -998,11 +930,7 @@
                                     {
                                           "listen": "test",
                                           "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 403\", function () {",
-                                                      "    pm.response.to.have.status(403);",
-                                                      "});"
-                                                ],
+                                                "exec": ["pm.test(\"Status code is 403\", function () {", "    pm.response.to.have.status(403);", "});"],
                                                 "type": "text/javascript"
                                           }
                                     }
@@ -1018,59 +946,10 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/categories",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "categories"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories"]
                                     },
                                     "description": "Attempts to access categories with customer token, expecting 403 Forbidden."
-                              }
-                        },
-                        {
-                              "name": "Delete Category",
-                              "event": [
-                                    {
-                                          "listen": "test",
-                                          "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 200\", function () {",
-                                                      "    pm.response.to.have.status(200);",
-                                                      "});",
-                                                      "pm.test(\"Category deleted response is valid\", function () {",
-                                                      "    var jsonData = pm.response.json();",
-                                                      "    pm.expect(jsonData.deleted).to.eql(true);",
-                                                      "});"
-                                                ],
-                                                "type": "text/javascript"
-                                          }
-                                    }
-                              ],
-                              "request": {
-                                    "method": "DELETE",
-                                    "header": [
-                                          {
-                                                "key": "Authorization",
-                                                "value": "Bearer {{adminAccessToken}}",
-                                                "type": "text"
-                                          }
-                                    ],
-                                    "url": {
-                                          "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "categories",
-                                                "{{categoryId}}"
-                                          ]
-                                    },
-                                    "description": "Deletes a category by ID (admin required)."
                               }
                         }
                   ]
@@ -1084,10 +963,7 @@
                                     {
                                           "listen": "prerequest",
                                           "script": {
-                                                "exec": [
-                                                      "const randomId = Math.floor(Math.random() * 1000000);",
-                                                      "pm.collectionVariables.set(\"tempProductSku\", `MOUSE-${randomId}`);"
-                                                ],
+                                                "exec": ["const randomId = Math.floor(Math.random() * 1000000);", "pm.collectionVariables.set(\"tempProductSku\", `MOUSE-${randomId}`);"],
                                                 "type": "text/javascript"
                                           }
                                     },
@@ -1129,16 +1005,55 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/products",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "products"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products"]
                                     },
                                     "description": "Creates a new product (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Create Product Error - Invalid Price Format",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 400\", function () {",
+                                                      "    pm.response.to.have.status(400);",
+                                                      "});",
+                                                      "pm.test(\"Validation error states price requirement\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.be.an(\"array\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Invalid Price Product\",\n  \"sku\": \"INVALID-PRICE-001\",\n  \"price\": \"not-a-price\",\n  \"stock\": 10,\n  \"categoryId\": \"{{categoryId}}\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products"]
+                                    },
+                                    "description": "Attempts to create a product with an invalid price format, expecting 400 Bad Request."
                               }
                         },
                         {
@@ -1176,14 +1091,8 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/products?page=1&limit=10",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "products"
-                                          ],
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products"],
                                           "query": [
                                                 {
                                                       "key": "page",
@@ -1196,6 +1105,61 @@
                                           ]
                                     },
                                     "description": "Lists products with pagination and filters (admin required)."
+                              }
+                        },
+                        {
+                              "name": "List Products with Filters",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Returns filtered products array\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"data\");",
+                                                      "    pm.expect(jsonData.data).to.be.an(\"array\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products?status=active&categoryId={{categoryId}}&page=1&limit=10",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products"],
+                                          "query": [
+                                                {
+                                                      "key": "status",
+                                                      "value": "active"
+                                                },
+                                                {
+                                                      "key": "categoryId",
+                                                      "value": "{{categoryId}}"
+                                                },
+                                                {
+                                                      "key": "page",
+                                                      "value": "1"
+                                                },
+                                                {
+                                                      "key": "limit",
+                                                      "value": "10"
+                                                }
+                                          ]
+                                    },
+                                    "description": "Lists active products filtered by status and category ID (admin required)."
                               }
                         },
                         {
@@ -1228,17 +1192,46 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "products",
-                                                "{{productId}}"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products", "{{productId}}"]
                                     },
                                     "description": "Gets product details by ID (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Get Product Error - Not Found",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 404\", function () {",
+                                                      "    pm.response.to.have.status(404);",
+                                                      "});",
+                                                      "pm.test(\"Error message is 'Product not found'\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.eql(\"Product not found\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products/nonexistent-product-id",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products", "nonexistent-product-id"]
+                                    },
+                                    "description": "Attempts to get a non-existent product by ID, expecting 404 Not Found."
                               }
                         },
                         {
@@ -1282,15 +1275,8 @@
                                     },
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "products",
-                                                "{{productId}}"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products", "{{productId}}"]
                                     },
                                     "description": "Updates an existing product by ID (admin required)."
                               }
@@ -1301,11 +1287,7 @@
                                     {
                                           "listen": "test",
                                           "script": {
-                                                "exec": [
-                                                      "pm.test(\"Status code is 403\", function () {",
-                                                      "    pm.response.to.have.status(403);",
-                                                      "});"
-                                                ],
+                                                "exec": ["pm.test(\"Status code is 403\", function () {", "    pm.response.to.have.status(403);", "});"],
                                                 "type": "text/javascript"
                                           }
                                     }
@@ -1321,14 +1303,8 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/products",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "products"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products"]
                                     },
                                     "description": "Attempts to access products with customer token, expecting 403 Forbidden."
                               }
@@ -1364,17 +1340,46 @@
                                     ],
                                     "url": {
                                           "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
-                                          "host": [
-                                                "{{baseUrl}}"
-                                          ],
-                                          "path": [
-                                                "api",
-                                                "v1",
-                                                "products",
-                                                "{{productId}}"
-                                          ]
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products", "{{productId}}"]
                                     },
                                     "description": "Deletes or archives a product by ID (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Delete Category",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Category deleted response is valid\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.deleted).to.eql(true);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories", "{{categoryId}}"]
+                                    },
+                                    "description": "Deletes a category by ID (admin required)."
                               }
                         }
                   ]
