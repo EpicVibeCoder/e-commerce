@@ -77,3 +77,6 @@ Thumbs.db
 
 # Tooling artifacts (Prisma ERD / Puppeteer)
 .puppeteer-cache/
+
+#graphql
+schema.gql

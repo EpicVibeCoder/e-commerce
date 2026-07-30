@@ -279,4 +279,71 @@ describe("ProductsService", () => {
                   await expect(service.remove("non-existent")).rejects.toThrow(NotFoundException);
             });
       });
+
+      describe("recommendations", () => {
+            it("returns active products from the same category, excluding the source", async () => {
+                  const otherProduct = {
+                        ...mockProduct,
+                        id: "product-2",
+                        sku: "TEST-SKU-2",
+                        name: "Other Product",
+                  };
+      
+                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue({
+                        id: "product-1",
+                        categoryId: "category-1",
+                  } as never);
+      
+                  const findManySpy = jest.spyOn(prisma.product, "findMany").mockResolvedValue([otherProduct]);
+      
+                  const result = await service.recommendations("product-1", 8);
+      
+                  expect(findManySpy).toHaveBeenCalledWith(
+                        expect.objectContaining({
+                              where: {
+                                    categoryId: "category-1",
+                                    status: ProductStatus.active,
+                                    id: { not: "product-1" },
+                              },
+                              take: 8,
+                              orderBy: { createdAt: "desc" },
+                        }),
+                  );
+                  expect(result).toHaveLength(1);
+                  expect(result[0].id).toBe("product-2");
+                  expect(result[0].price).toBe("99.99");
+            });
+      
+            it("throws NotFoundException when source product does not exist", async () => {
+                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
+      
+                  await expect(service.recommendations("missing")).rejects.toThrow(NotFoundException);
+            });
+      
+            it("caps limit at 20", async () => {
+                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue({
+                        id: "product-1",
+                        categoryId: "category-1",
+                  } as never);
+      
+                  const findManySpy = jest.spyOn(prisma.product, "findMany").mockResolvedValue([]);
+      
+                  await service.recommendations("product-1", 100);
+      
+                  expect(findManySpy).toHaveBeenCalledWith(expect.objectContaining({ take: 20 }));
+            });
+      
+            it("defaults limit to 8", async () => {
+                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue({
+                        id: "product-1",
+                        categoryId: "category-1",
+                  } as never);
+      
+                  const findManySpy = jest.spyOn(prisma.product, "findMany").mockResolvedValue([]);
+      
+                  await service.recommendations("product-1");
+      
+                  expect(findManySpy).toHaveBeenCalledWith(expect.objectContaining({ take: 8 }));
+            });
+      });
 });

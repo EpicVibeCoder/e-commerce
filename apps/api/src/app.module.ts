@@ -11,6 +11,7 @@ import { HealthModule } from "src/health/health.module";
 import { RedisModule } from "./redis/redis.module";
 import { CategoriesModule } from "./categories/categories.module";
 import { ProductsModule } from "./products/products.module";
+import { AppGraphQLModule } from './graphql/graphql.module';
 
 @Module({
       imports: [
@@ -26,6 +27,7 @@ import { ProductsModule } from "./products/products.module";
             RedisModule,
             CategoriesModule,
             ProductsModule,
+            AppGraphQLModule,
       ],
       controllers: [AppController],
       providers: [AppService],

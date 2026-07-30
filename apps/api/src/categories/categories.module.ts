@@ -7,5 +7,6 @@ import { RedisModule } from "src/redis/redis.module";
       controllers: [CategoriesController],
       providers: [CategoriesService],
       imports: [RedisModule],
+      exports: [CategoriesService],
 })
 export class CategoriesModule {}
