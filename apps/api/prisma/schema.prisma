@@ -43,15 +43,37 @@ enum PaymentProvider {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String?
-  name         String?
-  avatar       String?
-  role         Role     @default(customer)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  orders       Order[]
+  id                  String         @id @default(cuid())
+  email               String         @unique
+  passwordHash        String?
+  name                String?
+  avatar              String?
+  role                Role           @default(customer)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  orders              Order[]
+  emailVerifiedAt     DateTime?
+  failedLoginAttempts Int            @default(0)
+  lockedUntil         DateTime?
+  refreshTokens       RefreshToken[]
+  authTokens          AuthToken[]
+}
+
+model RefreshToken {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  token String @unique
+  expiresAt DateTime
+}
+
+
+model AuthToken {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  token String @unique
+  expiresAt DateTime
 }
 
 model Category {
