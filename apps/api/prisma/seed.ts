@@ -55,8 +55,9 @@ async function main() {
                   passwordHash,
                   name: "Demo Admin",
                   role: Role.admin,
+                  emailVerifiedAt: new Date(),
             },
-            update: { passwordHash, name: "Demo Admin", role: Role.admin },
+            update: { passwordHash, name: "Demo Admin", role: Role.admin, emailVerifiedAt: new Date() },
       });
 
       await prisma.user.upsert({
@@ -66,11 +67,13 @@ async function main() {
                   passwordHash,
                   name: "Demo Customer",
                   role: Role.customer,
+                  emailVerifiedAt: new Date(),
             },
             update: {
                   passwordHash,
                   name: "Demo Customer",
                   role: Role.customer,
+                  emailVerifiedAt: new Date(),
             },
       });
 
