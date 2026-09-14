@@ -7,6 +7,9 @@ import { PrismaService } from "src/prisma/prisma.service";
 import type { RegisterDto } from "./dto/register.dto.js";
 import type { LoginDto } from "./dto/login.dto.js";
 import type { JwtPayload } from "./types/jwt-payload.js";
+import { ConfigService } from "@nestjs/config";
+import { createHash, randomBytes } from "node:crypto";
+import { EnvironmentVariables } from "src/config/env.validation.js";
 
 const BCRYPT_ROUNDS = 12;
 
@@ -15,6 +18,7 @@ export class AuthService {
       constructor(
             private readonly prisma: PrismaService,
             private readonly jwt: JwtService,
+            private readonly config: ConfigService<EnvironmentVariables, true>,
       ) {}
 
       async register(dto: RegisterDto) {
@@ -41,6 +45,7 @@ export class AuthService {
             const user = User.fromPersistence(created);
             return {
                   accessToken: await this.signToken(user),
+                  refreshToken: await this.issueRefreshToken(user.id),
                   user: this.toPublicUser(user),
             };
       }
@@ -63,8 +68,36 @@ export class AuthService {
             const user = User.fromPersistence(record);
             return {
                   accessToken: await this.signToken(user),
+                  refreshToken: await this.issueRefreshToken(user.id),
                   user: this.toPublicUser(user),
             };
+      }
+
+      private async issueRefreshToken(userId: string): Promise<string> {
+            const rawToken = randomBytes(48).toString("base64url");
+            const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+
+            await this.prisma.refreshToken.create({
+                  data: {
+                        userId,
+                        tokenHash,
+                        expiresAt: this.getRefreshExpiresAt(),
+                  },
+            });
+
+            return rawToken;
+      }
+
+      private getRefreshExpiresAt(): Date {
+            const raw = this.config.get("JWT_REFRESH_EXPIRATION", { infer: true }); // e.g. "7d"
+            const match = /^(\d+)([dhms])$/.exec(raw);
+            if (!match) {
+                  throw new Error(`Invalid JWT_REFRESH_EXPIRATION: ${raw}`);
+            }
+            const amount = Number(match[1]);
+            const unit = match[2];
+            const ms = unit === "d" ? amount * 86_400_000 : unit === "h" ? amount * 3_600_000 : unit === "m" ? amount * 60_000 : amount * 1_000;
+            return new Date(Date.now() + ms);
       }
 
       private async signToken(user: User): Promise<string> {
