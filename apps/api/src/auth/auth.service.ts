@@ -73,6 +73,26 @@ export class AuthService {
             };
       }
 
+      async logout(rawToken: string) {
+            const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+
+            const stored = await this.prisma.refreshToken.findUnique({
+                  where: { tokenHash },
+            });
+
+            // Idempotent: missing or already revoked → OK
+            if (!stored || stored.revokedAt) {
+                  return { ok: true };
+            }
+
+            await this.prisma.refreshToken.update({
+                  where: { id: stored.id },
+                  data: { revokedAt: new Date() },
+            });
+
+            return { ok: true };
+      }
+
       async refresh(rawToken: string) {
             const tokenHash = createHash("sha256").update(rawToken).digest("hex");
 

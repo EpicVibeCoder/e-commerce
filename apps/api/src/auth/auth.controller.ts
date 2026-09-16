@@ -19,6 +19,11 @@ export class AuthController {
       login(@Body() dto: LoginDto) {
             return this.authService.login(dto);
       }
+      @Post("logout")
+      @ApiOperation({ summary: "Revoke refresh token" })
+      logout(@Body() dto: RefreshDto) {
+            return this.authService.logout(dto.refreshToken);
+      }
 
       @Post("refresh")
       @ApiOperation({ summary: "Rotate refresh token and issue new access token" })
