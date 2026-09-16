@@ -73,6 +73,31 @@ export class AuthService {
             };
       }
 
+      async refresh(rawToken: string) {
+            const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+
+            const stored = await this.prisma.refreshToken.findUnique({
+                  where: { tokenHash },
+                  include: { user: true },
+            });
+
+            if (!stored || stored.revokedAt || stored.expiresAt <= new Date()) {
+                  throw new UnauthorizedException("Invalid credentials");
+            }
+
+            await this.prisma.refreshToken.update({
+                  where: { id: stored.id },
+                  data: { revokedAt: new Date() },
+            });
+
+            const user = User.fromPersistence(stored.user);
+            return {
+                  accessToken: await this.signToken(user),
+                  refreshToken: await this.issueRefreshToken(user.id),
+                  user: this.toPublicUser(user),
+            };
+      }
+
       private async issueRefreshToken(userId: string): Promise<string> {
             const rawToken = randomBytes(48).toString("base64url");
             const tokenHash = createHash("sha256").update(rawToken).digest("hex");

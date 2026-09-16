@@ -3,6 +3,7 @@ import { AuthService } from "./auth.service.js";
 import { RegisterDto } from "./dto/register.dto.js";
 import { LoginDto } from "./dto/login.dto.js";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { RefreshDto } from "./dto/refresh.dto.js";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -17,5 +18,11 @@ export class AuthController {
       @ApiOperation({ summary: "Login and receive JWT" })
       login(@Body() dto: LoginDto) {
             return this.authService.login(dto);
+      }
+
+      @Post("refresh")
+      @ApiOperation({ summary: "Rotate refresh token and issue new access token" })
+      refresh(@Body() dto: RefreshDto) {
+            return this.authService.refresh(dto.refreshToken);
       }
 }
