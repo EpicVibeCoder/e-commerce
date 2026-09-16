@@ -54,14 +54,14 @@ export class User {
             if (password.length < PASSWORD_MIN_LENGTH) {
                   throw new DomainError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters`);
             }
-           if (!/[a-zA-Z]/.test(password)) {
-                 throw new DomainError("Password must include a letter");
-           }
-           if (!/[0-9]/.test(password)) {
-                 throw new DomainError("Password must include a digit");
-           }
-           if (!/[^a-zA-Z0-9]/.test(password)) {
-                 throw new DomainError("Password must include a symbol");
-           }
+            if (!/[a-zA-Z]/.test(password)) {
+                  throw new DomainError("Password must include a letter");
+            }
+            if (!/[0-9]/.test(password)) {
+                  throw new DomainError("Password must include a digit");
+            }
+            if (!/[^a-zA-Z0-9]/.test(password)) {
+                  throw new DomainError("Password must include a symbol");
+            }
       }
 }
