@@ -24,6 +24,7 @@ export class AuthService {
       async register(dto: RegisterDto) {
             const email = dto.email.trim().toLowerCase();
             User.assertEmail(email);
+            User.assertPassword(dto.password);
 
             const existing = await this.prisma.user.findUnique({
                   where: { email },

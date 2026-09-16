@@ -4,6 +4,7 @@ import type { UserPersistence } from "./types.js";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VALID_ROLES = new Set<string>(Object.values(Role));
+const PASSWORD_MIN_LENGTH = 8;
 
 export class User {
       readonly id: string;
@@ -47,5 +48,20 @@ export class User {
             if (!VALID_ROLES.has(role)) {
                   throw new DomainError(`Invalid role: ${role}`);
             }
+      }
+
+      static assertPassword(password: string): void {
+            if (password.length < PASSWORD_MIN_LENGTH) {
+                  throw new DomainError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters`);
+            }
+           if (!/[a-zA-Z]/.test(password)) {
+                 throw new DomainError("Password must include a letter");
+           }
+           if (!/[0-9]/.test(password)) {
+                 throw new DomainError("Password must include a digit");
+           }
+           if (!/[^a-zA-Z0-9]/.test(password)) {
+                 throw new DomainError("Password must include a symbol");
+           }
       }
 }
