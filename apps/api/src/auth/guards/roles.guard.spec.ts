@@ -5,7 +5,7 @@ import { RolesGuard } from "./roles.guard";
 
 describe("RolesGuard", () => {
       const reflector = {
-            getAllAndOverride: jest.fn(),
+            getAllAndOverride: vi.fn(),
       } as unknown as Reflector;
 
       const guard = new RolesGuard(reflector);
@@ -20,22 +20,22 @@ describe("RolesGuard", () => {
             }) as never;
 
       it("allows when no roles metadata", () => {
-            jest.spyOn(reflector, "getAllAndOverride").mockReturnValue(undefined);
+            vi.spyOn(reflector, "getAllAndOverride").mockReturnValue(undefined);
             expect(guard.canActivate(context({ role: Role.customer }))).toBe(true);
       });
 
       it("allows admin for admin route", () => {
-            jest.spyOn(reflector, "getAllAndOverride").mockReturnValue([Role.admin]);
+            vi.spyOn(reflector, "getAllAndOverride").mockReturnValue([Role.admin]);
             expect(guard.canActivate(context({ role: Role.admin }))).toBe(true);
       });
 
       it("forbids customer on admin route", () => {
-            jest.spyOn(reflector, "getAllAndOverride").mockReturnValue([Role.admin]);
+            vi.spyOn(reflector, "getAllAndOverride").mockReturnValue([Role.admin]);
             expect(() => guard.canActivate(context({ role: Role.customer }))).toThrow(ForbiddenException);
       });
 
       it("allows super_admin on admin route", () => {
-            jest.spyOn(reflector, "getAllAndOverride").mockReturnValue([Role.admin]);
+            vi.spyOn(reflector, "getAllAndOverride").mockReturnValue([Role.admin]);
             expect(guard.canActivate(context({ role: Role.super_admin }))).toBe(true);
       });
 });

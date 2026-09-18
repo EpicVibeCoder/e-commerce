@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+
 import { UsersController } from "src/users/users.controller";
 import { UsersService } from "src/users/users.service";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
@@ -13,9 +14,9 @@ describe("UsersController", () => {
                         {
                               provide: UsersService,
                               useValue: {
-                                    getMe: jest.fn(),
-                                    getMyOrders: jest.fn(),
-                                    getMyPayments: jest.fn(),
+                                    getMe: vi.fn(),
+                                    getMyOrders: vi.fn(),
+                                    getMyPayments: vi.fn(),
                               },
                         },
                   ],

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+
 import { ProductsService } from "./products.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { Prisma } from "src/generated/prisma/client";
@@ -37,16 +38,16 @@ describe("ProductsService", () => {
                               provide: PrismaService,
                               useValue: {
                                     category: {
-                                          findUnique: jest.fn(),
+                                          findUnique: vi.fn(),
                                     },
                                     product: {
-                                          findMany: jest.fn(),
-                                          count: jest.fn(),
-                                          findUnique: jest.fn(),
-                                          findFirst: jest.fn(),
-                                          create: jest.fn(),
-                                          update: jest.fn(),
-                                          delete: jest.fn(),
+                                          findMany: vi.fn(),
+                                          count: vi.fn(),
+                                          findUnique: vi.fn(),
+                                          findFirst: vi.fn(),
+                                          create: vi.fn(),
+                                          update: vi.fn(),
+                                          delete: vi.fn(),
                                     },
                               },
                         },
@@ -63,8 +64,8 @@ describe("ProductsService", () => {
 
       describe("findAll", () => {
             it("should return paginated list of products with meta info", async () => {
-                  const findManySpy = jest.spyOn(prisma.product, "findMany").mockResolvedValue([mockProduct]);
-                  jest.spyOn(prisma.product, "count").mockResolvedValue(1);
+                  const findManySpy = vi.spyOn(prisma.product, "findMany").mockResolvedValue([mockProduct]);
+                  vi.spyOn(prisma.product, "count").mockResolvedValue(1);
 
                   const result = await service.findAll({ page: 1, limit: 10 });
 
@@ -104,8 +105,8 @@ describe("ProductsService", () => {
             });
 
             it("should default page to 1 and limit to 20 if not provided", async () => {
-                  const findManySpy = jest.spyOn(prisma.product, "findMany").mockResolvedValue([]);
-                  jest.spyOn(prisma.product, "count").mockResolvedValue(0);
+                  const findManySpy = vi.spyOn(prisma.product, "findMany").mockResolvedValue([]);
+                  vi.spyOn(prisma.product, "count").mockResolvedValue(0);
 
                   await service.findAll({});
 
@@ -120,7 +121,7 @@ describe("ProductsService", () => {
 
       describe("findOne", () => {
             it("should return a product when it exists", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
 
                   const result = await service.findOne("product-1");
 
@@ -129,7 +130,7 @@ describe("ProductsService", () => {
             });
 
             it("should throw NotFoundException when product is not found", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
 
                   await expect(service.findOne("non-existent")).rejects.toThrow(NotFoundException);
             });
@@ -146,13 +147,13 @@ describe("ProductsService", () => {
             };
 
             it("should create a product with valid fields", async () => {
-                  const findUniqueSpy = jest.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
-                  const categoryFindUniqueSpy = jest.spyOn(prisma.category, "findUnique").mockResolvedValue({
+                  const findUniqueSpy = vi.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
+                  const categoryFindUniqueSpy = vi.spyOn(prisma.category, "findUnique").mockResolvedValue({
                         ...mockCategory,
                         parentId: null,
                         sortOrder: 0,
                   });
-                  jest.spyOn(prisma.product, "create").mockResolvedValue({
+                  vi.spyOn(prisma.product, "create").mockResolvedValue({
                         ...mockProduct,
                         sku: "NEW-SKU",
                         name: "New Product",
@@ -169,21 +170,21 @@ describe("ProductsService", () => {
             });
 
             it("should throw ConflictException if SKU already exists", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
 
                   await expect(service.create(createDto)).rejects.toThrow(ConflictException);
             });
 
             it("should throw NotFoundException if category does not exist", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
-                  jest.spyOn(prisma.category, "findUnique").mockResolvedValue(null);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
+                  vi.spyOn(prisma.category, "findUnique").mockResolvedValue(null);
 
                   await expect(service.create(createDto)).rejects.toThrow(NotFoundException);
             });
 
             it("should throw BadRequestException if price is zero or negative", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
-                  jest.spyOn(prisma.category, "findUnique").mockResolvedValue({
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
+                  vi.spyOn(prisma.category, "findUnique").mockResolvedValue({
                         ...mockCategory,
                         parentId: null,
                         sortOrder: 0,
@@ -205,8 +206,8 @@ describe("ProductsService", () => {
             };
 
             it("should update product fields when valid", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
-                  jest.spyOn(prisma.product, "update").mockResolvedValue({
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
+                  vi.spyOn(prisma.product, "update").mockResolvedValue({
                         ...mockProduct,
                         name: "Updated Product",
                         price: new Prisma.Decimal("129.99"),
@@ -219,21 +220,21 @@ describe("ProductsService", () => {
             });
 
             it("should throw NotFoundException if product doesn't exist", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
 
                   await expect(service.update("non-existent", updateDto)).rejects.toThrow(NotFoundException);
             });
 
             it("should check and throw ConflictException if changing to an existing SKU", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
-                  jest.spyOn(prisma.product, "findFirst").mockResolvedValue({ ...mockProduct, id: "another-product" });
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
+                  vi.spyOn(prisma.product, "findFirst").mockResolvedValue({ ...mockProduct, id: "another-product" });
 
                   await expect(service.update("product-1", { sku: "existing-sku" })).rejects.toThrow(ConflictException);
             });
 
             it("should assert and throw NotFoundException if changing to non-existent category", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
-                  jest.spyOn(prisma.category, "findUnique").mockResolvedValue(null);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(mockProduct);
+                  vi.spyOn(prisma.category, "findUnique").mockResolvedValue(null);
 
                   await expect(service.update("product-1", { categoryId: "non-existent" })).rejects.toThrow(NotFoundException);
             });
@@ -246,8 +247,8 @@ describe("ProductsService", () => {
                         _count: { orderItems: 1 },
                   };
 
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(productWithOrderItems);
-                  const updateSpy = jest.spyOn(prisma.product, "update").mockResolvedValue(mockProduct);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(productWithOrderItems);
+                  const updateSpy = vi.spyOn(prisma.product, "update").mockResolvedValue(mockProduct);
 
                   const result = await service.remove("product-1");
 
@@ -264,8 +265,8 @@ describe("ProductsService", () => {
                         _count: { orderItems: 0 },
                   };
 
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(productWithoutOrderItems);
-                  const deleteSpy = jest.spyOn(prisma.product, "delete").mockResolvedValue(mockProduct);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(productWithoutOrderItems);
+                  const deleteSpy = vi.spyOn(prisma.product, "delete").mockResolvedValue(mockProduct);
 
                   const result = await service.remove("product-1");
 
@@ -274,7 +275,7 @@ describe("ProductsService", () => {
             });
 
             it("should throw NotFoundException if product does not exist", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
 
                   await expect(service.remove("non-existent")).rejects.toThrow(NotFoundException);
             });
@@ -289,12 +290,12 @@ describe("ProductsService", () => {
                         name: "Other Product",
                   };
 
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue({
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue({
                         id: "product-1",
                         categoryId: "category-1",
                   } as never);
 
-                  const findManySpy = jest.spyOn(prisma.product, "findMany").mockResolvedValue([otherProduct]);
+                  const findManySpy = vi.spyOn(prisma.product, "findMany").mockResolvedValue([otherProduct]);
 
                   const result = await service.recommendations("product-1", 8);
 
@@ -315,18 +316,18 @@ describe("ProductsService", () => {
             });
 
             it("throws NotFoundException when source product does not exist", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue(null);
 
                   await expect(service.recommendations("missing")).rejects.toThrow(NotFoundException);
             });
 
             it("caps limit at 20", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue({
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue({
                         id: "product-1",
                         categoryId: "category-1",
                   } as never);
 
-                  const findManySpy = jest.spyOn(prisma.product, "findMany").mockResolvedValue([]);
+                  const findManySpy = vi.spyOn(prisma.product, "findMany").mockResolvedValue([]);
 
                   await service.recommendations("product-1", 100);
 
@@ -334,12 +335,12 @@ describe("ProductsService", () => {
             });
 
             it("defaults limit to 8", async () => {
-                  jest.spyOn(prisma.product, "findUnique").mockResolvedValue({
+                  vi.spyOn(prisma.product, "findUnique").mockResolvedValue({
                         id: "product-1",
                         categoryId: "category-1",
                   } as never);
 
-                  const findManySpy = jest.spyOn(prisma.product, "findMany").mockResolvedValue([]);
+                  const findManySpy = vi.spyOn(prisma.product, "findMany").mockResolvedValue([]);
 
                   await service.recommendations("product-1");
 

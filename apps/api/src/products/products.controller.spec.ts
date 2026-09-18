@@ -1,15 +1,17 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { RolesGuard } from "src/auth/guards/roles.guard";
 import { ProductsController } from "./products.controller";
 import { ProductsService } from "./products.service";
 import { ProductStatus } from "src/generated/prisma/enums";
 
 describe("ProductsController", () => {
       let controller: ProductsController;
-      const findAll = jest.fn();
-      const findOne = jest.fn();
-      const create = jest.fn();
-      const update = jest.fn();
-      const remove = jest.fn();
+      const findAll = vi.fn();
+      const findOne = vi.fn();
+      const create = vi.fn();
+      const update = vi.fn();
+      const remove = vi.fn();
 
       const mockProduct = {
             id: "product-1",
@@ -42,7 +44,12 @@ describe("ProductsController", () => {
                               useValue: { findAll, findOne, create, update, remove },
                         },
                   ],
-            }).compile();
+            })
+                  .overrideGuard(JwtAuthGuard)
+                  .useValue({ canActivate: () => true })
+                  .overrideGuard(RolesGuard)
+                  .useValue({ canActivate: () => true })
+                  .compile();
 
             controller = module.get<ProductsController>(ProductsController);
       });

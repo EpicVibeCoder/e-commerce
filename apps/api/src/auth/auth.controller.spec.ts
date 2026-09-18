@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+
 import { AuthController } from "src/auth/auth.controller";
 import { AuthService } from "src/auth/auth.service";
 
@@ -12,8 +13,8 @@ describe("AuthController", () => {
                         {
                               provide: AuthService,
                               useValue: {
-                                    register: jest.fn(),
-                                    login: jest.fn(),
+                                    register: vi.fn(),
+                                    login: vi.fn(),
                               },
                         },
                   ],

@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+
 import { CategoriesService } from "./categories.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { RedisService } from "src/redis/redis.service";
@@ -7,20 +8,20 @@ import { REDIS_KEYS, REDIS_TTL_SECONDS } from "src/redis/redis-keys";
 describe("CategoriesService", () => {
       let service: CategoriesService;
       const categoryRepository = {
-            findMany: jest.fn(),
-            findUnique: jest.fn(),
-            findFirst: jest.fn(),
-            create: jest.fn(),
-            update: jest.fn(),
-            delete: jest.fn(),
+            findMany: vi.fn(),
+            findUnique: vi.fn(),
+            findFirst: vi.fn(),
+            create: vi.fn(),
+            update: vi.fn(),
+            delete: vi.fn(),
       };
       const redis = {
-            getJson: jest.fn(),
-            setJson: jest.fn(),
-            del: jest.fn(),
+            getJson: vi.fn(),
+            setJson: vi.fn(),
+            del: vi.fn(),
       };
       beforeEach(async () => {
-            jest.resetAllMocks();
+            vi.resetAllMocks();
             const module: TestingModule = await Test.createTestingModule({
                   providers: [
                         CategoriesService,

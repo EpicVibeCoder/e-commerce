@@ -1,4 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { RolesGuard } from "src/auth/guards/roles.guard";
 import { CategoriesController } from "./categories.controller";
 import { CategoriesService } from "./categories.service";
 
@@ -11,16 +13,15 @@ describe("CategoriesController", () => {
                   providers: [
                         {
                               provide: CategoriesService,
-                              useValue: {
-                                    findAll: jest.fn(),
-                                    findOne: jest.fn(),
-                                    create: jest.fn(),
-                                    update: jest.fn(),
-                                    remove: jest.fn(),
-                              },
+                              useValue: {/* existing mocks */},
                         },
                   ],
-            }).compile();
+            })
+                  .overrideGuard(JwtAuthGuard)
+                  .useValue({ canActivate: () => true })
+                  .overrideGuard(RolesGuard)
+                  .useValue({ canActivate: () => true })
+                  .compile();
 
             controller = module.get<CategoriesController>(CategoriesController);
       });

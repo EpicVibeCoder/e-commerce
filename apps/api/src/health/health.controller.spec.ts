@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+
 import { HealthController } from "src/health/health.controller";
 import { HealthService } from "src/health/health.service";
 
@@ -12,7 +13,7 @@ describe("HealthController", () => {
                         {
                               provide: HealthService,
                               useValue: {
-                                    checkReady: jest.fn(),
+                                    checkReady: vi.fn(),
                               },
                         },
                   ],

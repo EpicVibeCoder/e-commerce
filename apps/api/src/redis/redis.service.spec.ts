@@ -1,26 +1,29 @@
 import { Test, TestingModule } from "@nestjs/testing";
+
 import { ConfigService } from "@nestjs/config";
 import { RedisService } from "./redis.service";
 
 const mockRedis = {
-      connect: jest.fn().mockResolvedValue(undefined),
-      quit: jest.fn().mockResolvedValue(undefined),
-      get: jest.fn(),
-      set: jest.fn(),
-      del: jest.fn(),
-      on: jest.fn(),
+      connect: vi.fn().mockResolvedValue(undefined),
+      quit: vi.fn().mockResolvedValue(undefined),
+      get: vi.fn(),
+      set: vi.fn(),
+      del: vi.fn(),
+      on: vi.fn(),
 };
 
-jest.mock("ioredis", () => jest.fn().mockImplementation(() => mockRedis));
-
+vi.mock("ioredis", () => ({
+      default: vi.fn(function () {
+            return mockRedis;
+      }),
+}));
 describe("RedisService", () => {
       let module: TestingModule;
       let service: RedisService;
-      let configGet: jest.Mock;
-
+let configGet: ReturnType<typeof vi.fn>;
       beforeEach(async () => {
-            jest.clearAllMocks();
-            configGet = jest.fn().mockReturnValue("redis://localhost:6379");
+            vi.clearAllMocks();
+            configGet = vi.fn().mockReturnValue("redis://localhost:6379");
 
             module = await Test.createTestingModule({
                   providers: [

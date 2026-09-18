@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+
 import { HealthService } from "src/health/health.service";
 import { PrismaService } from "src/prisma/prisma.service";
 
@@ -12,7 +13,7 @@ describe("HealthService", () => {
                         {
                               provide: PrismaService,
                               useValue: {
-                                    $queryRaw: jest.fn(),
+                                    $queryRaw: vi.fn(),
                               },
                         },
                   ],
