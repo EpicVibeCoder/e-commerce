@@ -20,7 +20,7 @@ vi.mock("ioredis", () => ({
 describe("RedisService", () => {
       let module: TestingModule;
       let service: RedisService;
-let configGet: ReturnType<typeof vi.fn>;
+      let configGet: ReturnType<typeof vi.fn>;
       beforeEach(async () => {
             vi.clearAllMocks();
             configGet = vi.fn().mockReturnValue("redis://localhost:6379");
