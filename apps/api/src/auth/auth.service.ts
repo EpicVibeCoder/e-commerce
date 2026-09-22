@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import { Role } from "src/generated/prisma/enums";
+import { AuthTokenType, Role } from "src/generated/prisma/enums";
 import { User } from "src/domain/user";
 import { PrismaService } from "src/prisma/prisma.service";
 import type { RegisterDto } from "./dto/register.dto.js";
@@ -10,6 +10,7 @@ import type { JwtPayload } from "./types/jwt-payload.js";
 import { ConfigService } from "@nestjs/config";
 import { createHash, randomBytes } from "node:crypto";
 import { EnvironmentVariables } from "src/config/env.validation.js";
+import { MailService } from "src/mail/mail.service.js";
 
 const BCRYPT_ROUNDS = 12;
 
@@ -19,6 +20,7 @@ export class AuthService {
             private readonly prisma: PrismaService,
             private readonly jwt: JwtService,
             private readonly config: ConfigService<EnvironmentVariables, true>,
+            private readonly mailService: MailService,
       ) {}
 
       async register(dto: RegisterDto) {
@@ -43,6 +45,17 @@ export class AuthService {
                   },
             });
 
+            const rawToken = randomBytes(48).toString("base64url");
+            const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+            await this.prisma.authToken.create({
+                  data: {
+                        userId: created.id,
+                        type: AuthTokenType.email_verification,
+                        tokenHash,
+                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h for now
+                  },
+            });
+            await this.mailService.sendVerificationEmail({ to: email, token: rawToken });
             const user = User.fromPersistence(created);
             return {
                   accessToken: await this.signToken(user),
@@ -92,6 +105,32 @@ export class AuthService {
             });
 
             return { ok: true };
+      }
+      
+      async verifyEmail(rawToken: string) {
+            const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+
+            const stored = await this.prisma.authToken.findUnique({
+                  where: { tokenHash },
+            });
+
+            if (!stored || stored.type !== AuthTokenType.email_verification || stored.usedAt || stored.expiresAt <= new Date()) {
+                  throw new UnauthorizedException("Invalid or expired verification token");
+            }
+
+            await this.prisma.$transaction([
+                  this.prisma.authToken.update({
+                        where: { id: stored.id },
+                        data: { usedAt: new Date() },
+                  }),
+                  this.prisma.user.update({
+                        where: { id: stored.userId },
+                        data: { emailVerifiedAt: new Date() },
+                  }),
+            ]);
+
+            // Stub: real redirect to storefront comes in Phase 5
+            return { ok: true, message: "Email verified" };
       }
 
       async refresh(rawToken: string) {
