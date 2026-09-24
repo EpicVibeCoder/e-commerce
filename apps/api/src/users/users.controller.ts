@@ -4,6 +4,7 @@ import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { UsersService } from "./users.service";
 import { CurrentUser } from "src/auth/decorators/current-user.decorator";
 import type { JwtPayload } from "src/auth/types/jwt-payload";
+import { EmailVerifiedGuard } from "src/auth/guards/email-verified.guard";
 
 @ApiTags("users")
 @ApiBearerAuth("access-token")
@@ -18,6 +19,7 @@ export class UsersController {
             return this.usersService.getMe(user.sub);
       }
       @Get("me/orders")
+      @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
       @ApiOperation({ summary: "Get the current user's orders", description: "Get the current user's orders" })
       myOrders(@CurrentUser() user: JwtPayload) {
             return this.usersService.getMyOrders(user.sub);
