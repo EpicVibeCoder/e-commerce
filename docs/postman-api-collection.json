@@ -28,6 +28,14 @@
             {
                   "key": "productId",
                   "value": ""
+            },
+            {
+                  "key": "refreshToken",
+                  "value": ""
+            },
+            {
+                  "key": "verificationToken",
+                  "value": ""
             }
       ],
       "item": [
@@ -116,14 +124,16 @@
                                                       "pm.test(\"Status code is 201\", function () {",
                                                       "    pm.response.to.have.status(201);",
                                                       "});",
-                                                      "pm.test(\"Response contains accessToken and user details\", function () {",
+                                                      "pm.test(\"Response contains accessToken, refreshToken, and user details\", function () {",
                                                       "    var jsonData = pm.response.json();",
                                                       "    pm.expect(jsonData).to.have.property(\"accessToken\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"refreshToken\");",
                                                       "    pm.expect(jsonData).to.have.property(\"user\");",
                                                       "    pm.expect(jsonData.user).to.have.property(\"id\");",
                                                       "    pm.expect(jsonData.user).to.have.property(\"email\");",
                                                       "    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get(\"registerEmail\"));",
                                                       "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                                                      "    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
                                                       "});"
                                                 ],
                                                 "type": "text/javascript"
@@ -275,6 +285,80 @@
                               }
                         },
                         {
+                              "name": "Verify Email - Invalid or Expired Token",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 401\", function () {",
+                                                      "    pm.response.to.have.status(401);",
+                                                      "});",
+                                                      "pm.test(\"Error message is 'Invalid or expired verification token'\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.eql(\"Invalid or expired verification token\");",
+                                                      "    pm.expect(jsonData.error).to.eql(\"Unauthorized\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/verify-email?token=invalid-or-expired-token",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "verify-email"],
+                                          "query": [
+                                                {
+                                                      "key": "token",
+                                                      "value": "invalid-or-expired-token"
+                                                }
+                                          ]
+                                    },
+                                    "description": "Attempts to verify email with an invalid or expired token, expecting a 401 Unauthorized error."
+                              }
+                        },
+                        {
+                              "name": "Verify Email",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Email verified response is valid\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.ok).to.eql(true);",
+                                                      "    pm.expect(jsonData.message).to.eql(\"Email verified\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/verify-email?token={{verificationToken}}",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "verify-email"],
+                                          "query": [
+                                                {
+                                                      "key": "token",
+                                                      "value": "{{verificationToken}}"
+                                                }
+                                          ]
+                                    },
+                                    "description": "Verifies user email using the token received in the verification email."
+                              }
+                        },
+                        {
                               "name": "Login Successful - Registered Customer",
                               "event": [
                                     {
@@ -284,12 +368,14 @@
                                                       "pm.test(\"Status code is 201\", function () {",
                                                       "    pm.response.to.have.status(201);",
                                                       "});",
-                                                      "pm.test(\"Response contains accessToken and user details\", function () {",
+                                                      "pm.test(\"Response contains accessToken, refreshToken, and user details\", function () {",
                                                       "    var jsonData = pm.response.json();",
                                                       "    pm.expect(jsonData).to.have.property(\"accessToken\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"refreshToken\");",
                                                       "    pm.expect(jsonData).to.have.property(\"user\");",
                                                       "    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get(\"registerEmail\"));",
                                                       "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                                                      "    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
                                                       "});"
                                                 ],
                                                 "type": "text/javascript"
@@ -318,6 +404,132 @@
                               }
                         },
                         {
+                              "name": "Refresh Token Successful",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Response contains new tokens and user details\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"accessToken\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"refreshToken\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"user\");",
+                                                      "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                                                      "    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/refresh",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "refresh"]
+                                    },
+                                    "description": "Rotates the refresh token and issues a new access token and refresh token."
+                              }
+                        },
+                        {
+                              "name": "Refresh Token Error - Invalid Token",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 401\", function () {",
+                                                      "    pm.response.to.have.status(401);",
+                                                      "});",
+                                                      "pm.test(\"Error message is 'Invalid credentials'\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.eql(\"Invalid credentials\");",
+                                                      "    pm.expect(jsonData.error).to.eql(\"Unauthorized\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"refreshToken\": \"invalid-or-expired-token\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/refresh",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "refresh"]
+                                    },
+                                    "description": "Attempts to refresh access token with an invalid or expired refresh token, expecting a 401 Unauthorized error."
+                              }
+                        },
+                        {
+                              "name": "Refresh Token Error - Missing Token",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 400\", function () {",
+                                                      "    pm.response.to.have.status(400);",
+                                                      "});",
+                                                      "pm.test(\"Validation error states refreshToken requirements\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.be.an(\"array\");",
+                                                      "    pm.expect(jsonData.message).to.include(\"refreshToken should not be empty\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/refresh",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "refresh"]
+                                    },
+                                    "description": "Attempts to refresh tokens without providing a refreshToken, expecting a 400 Bad Request error."
+                              }
+                        },
+                        {
                               "name": "Login Successful - Demo Customer",
                               "event": [
                                     {
@@ -327,12 +539,14 @@
                                                       "pm.test(\"Status code is 201\", function () {",
                                                       "    pm.response.to.have.status(201);",
                                                       "});",
-                                                      "pm.test(\"Response contains accessToken and user details\", function () {",
+                                                      "pm.test(\"Response contains accessToken, refreshToken, and user details\", function () {",
                                                       "    var jsonData = pm.response.json();",
                                                       "    pm.expect(jsonData).to.have.property(\"accessToken\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"refreshToken\");",
                                                       "    pm.expect(jsonData).to.have.property(\"user\");",
                                                       "    pm.expect(jsonData.user.email).to.eql(\"demo@customer.com\");",
                                                       "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+                                                      "    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
                                                       "});"
                                                 ],
                                                 "type": "text/javascript"
@@ -373,6 +587,7 @@
                                                       "pm.test(\"Response contains accessToken for admin\", function () {",
                                                       "    var jsonData = pm.response.json();",
                                                       "    pm.expect(jsonData).to.have.property(\"accessToken\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"refreshToken\");",
                                                       "    pm.expect(jsonData).to.have.property(\"user\");",
                                                       "    pm.expect(jsonData.user.role).to.eql(\"admin\");",
                                                       "    pm.collectionVariables.set(\"adminAccessToken\", jsonData.accessToken);",
@@ -524,6 +739,87 @@
                                           "path": ["api", "v1", "auth", "login"]
                                     },
                                     "description": "Attempts to login with an invalid email format, expecting a 400 Bad Request error."
+                              }
+                        },
+                        {
+                              "name": "Logout Error - Missing Token",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 400\", function () {",
+                                                      "    pm.response.to.have.status(400);",
+                                                      "});",
+                                                      "pm.test(\"Validation error states refreshToken requirements\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.be.an(\"array\");",
+                                                      "    pm.expect(jsonData.message).to.include(\"refreshToken should not be empty\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/logout",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "logout"]
+                                    },
+                                    "description": "Attempts to logout without providing a refreshToken, expecting a 400 Bad Request error."
+                              }
+                        },
+                        {
+                              "name": "Logout Successful",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Logout response is valid\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.ok).to.eql(true);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/logout",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "logout"]
+                                    },
+                                    "description": "Revokes the provided refresh token."
                               }
                         }
                   ]
@@ -768,6 +1064,52 @@
                               }
                         },
                         {
+                              "name": "Create Category Error - Duplicate Slug",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 409\", function () {",
+                                                      "    pm.response.to.have.status(409);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates duplicate slug\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.include(\"already exists\");",
+                                                      "    pm.expect(jsonData.error).to.eql(\"Conflict\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Duplicate Slug Category\",\n  \"slug\": \"{{tempCategorySlug}}\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories"]
+                                    },
+                                    "description": "Attempts to create a category with an already existing slug, expecting a 409 Conflict error."
+                              }
+                        },
+                        {
                               "name": "List Categories",
                               "event": [
                                     {
@@ -951,6 +1293,131 @@
                                     },
                                     "description": "Attempts to access categories with customer token, expecting 403 Forbidden."
                               }
+                        },
+                        {
+                              "name": "Create Category for Deletion",
+                              "event": [
+                                    {
+                                          "listen": "prerequest",
+                                          "script": {
+                                                "exec": ["const randomId = Math.floor(Math.random() * 1000000);", "pm.collectionVariables.set(\"tempDeleteCategorySlug\", `temp-delete-${randomId}`);"],
+                                                "type": "text/javascript"
+                                          }
+                                    },
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Response contains created category details\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"id\");",
+                                                      "    pm.collectionVariables.set(\"tempDeleteCategoryId\", jsonData.id);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Category to Delete\",\n  \"slug\": \"{{tempDeleteCategorySlug}}\",\n  \"sortOrder\": 99\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories"]
+                                    },
+                                    "description": "Creates a temporary category to test category deletion (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Delete Category Error - Not Found",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 404\", function () {",
+                                                      "    pm.response.to.have.status(404);",
+                                                      "});",
+                                                      "pm.test(\"Error message is 'Category not found'\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.eql(\"Category not found\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories/nonexistent-category-id",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories", "nonexistent-category-id"]
+                                    },
+                                    "description": "Attempts to delete a non-existent category by ID, expecting 404 Not Found (admin required)."
+                              }
+                        },
+                        {
+                              "name": "Delete Category",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Category deleted response is valid\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.deleted).to.eql(true);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories/{{tempDeleteCategoryId}}",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories", "{{tempDeleteCategoryId}}"]
+                                    },
+                                    "description": "Deletes a category by ID (admin required)."
+                              }
                         }
                   ]
             },
@@ -1054,6 +1521,97 @@
                                           "path": ["api", "v1", "products"]
                                     },
                                     "description": "Attempts to create a product with an invalid price format, expecting 400 Bad Request."
+                              }
+                        },
+                        {
+                              "name": "Create Product Error - Duplicate SKU",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 409\", function () {",
+                                                      "    pm.response.to.have.status(409);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates duplicate SKU\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.include(\"already exists\");",
+                                                      "    pm.expect(jsonData.error).to.eql(\"Conflict\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Duplicate SKU Product\",\n  \"sku\": \"{{tempProductSku}}\",\n  \"price\": \"29.99\",\n  \"stock\": 10,\n  \"categoryId\": \"{{categoryId}}\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products"]
+                                    },
+                                    "description": "Attempts to create a product with an already existing SKU, expecting a 409 Conflict error."
+                              }
+                        },
+                        {
+                              "name": "Create Product Error - Category Not Found",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 404\", function () {",
+                                                      "    pm.response.to.have.status(404);",
+                                                      "});",
+                                                      "pm.test(\"Error message is 'Category not found'\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.eql(\"Category not found\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"name\": \"Missing Category Product\",\n  \"sku\": \"ORPHAN-SKU-999\",\n  \"price\": \"19.99\",\n  \"stock\": 10,\n  \"categoryId\": \"nonexistent-category-id\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/products",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "products"]
+                                    },
+                                    "description": "Attempts to create a product with a non-existent category ID, expecting a 404 Not Found error."
                               }
                         },
                         {
@@ -1310,6 +1868,43 @@
                               }
                         },
                         {
+                              "name": "Delete Category Error - Cannot Delete with Products",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 409\", function () {",
+                                                      "    pm.response.to.have.status(409);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates category has products\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.eql(\"Cannot delete category with products\");",
+                                                      "    pm.expect(jsonData.error).to.eql(\"Conflict\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{adminAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "categories", "{{categoryId}}"]
+                                    },
+                                    "description": "Attempts to delete a category that still has products assigned to it, expecting a 409 Conflict error."
+                              }
+                        },
+                        {
                               "name": "Delete Product",
                               "event": [
                                     {
@@ -1347,7 +1942,7 @@
                               }
                         },
                         {
-                              "name": "Delete Category",
+                              "name": "Delete Category (Cleanup)",
                               "event": [
                                     {
                                           "listen": "test",
@@ -1379,7 +1974,7 @@
                                           "host": ["{{baseUrl}}"],
                                           "path": ["api", "v1", "categories", "{{categoryId}}"]
                                     },
-                                    "description": "Deletes a category by ID (admin required)."
+                                    "description": "Deletes the main test category now that attached products have been deleted (admin required)."
                               }
                         }
                   ]
