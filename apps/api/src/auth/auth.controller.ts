@@ -1,9 +1,12 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
-import { AuthService } from "./auth.service.js";
-import { RegisterDto } from "./dto/register.dto.js";
-import { LoginDto } from "./dto/login.dto.js";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
-import { RefreshDto } from "./dto/refresh.dto.js";
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { RegisterDto } from "./dto/register.dto";
+import { LoginDto } from "./dto/login.dto";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { RefreshDto } from "./dto/refresh.dto";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { CurrentUser } from "./decorators/current-user.decorator";  
+import type { JwtPayload } from "./types/jwt-payload";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -29,6 +32,14 @@ export class AuthController {
       @ApiOperation({ summary: "Verify email with token from registration email" })
       verifyEmail(@Query("token") token: string) {
             return this.authService.verifyEmail(token);
+      }
+
+      @Post("resend-verification")
+      @UseGuards(JwtAuthGuard)
+      @ApiBearerAuth("access-token")
+      @ApiOperation({ summary: "Resend email verification link" })
+      resendVerification(@CurrentUser() user: JwtPayload) {
+            return this.authService.resendVerification(user.sub);
       }
 
       @Post("refresh")

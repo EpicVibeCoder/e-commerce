@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { AuthTokenType, Role } from "src/generated/prisma/enums";
@@ -106,7 +106,7 @@ export class AuthService {
 
             return { ok: true };
       }
-      
+
       async verifyEmail(rawToken: string) {
             const tokenHash = createHash("sha256").update(rawToken).digest("hex");
 
@@ -131,6 +131,46 @@ export class AuthService {
 
             // Stub: real redirect to storefront comes in Phase 5
             return { ok: true, message: "Email verified" };
+      }
+      async resendVerification(userId: string) {
+            const record = await this.prisma.user.findUnique({
+                  where: { id: userId },
+            });
+            if (!record) {
+                  throw new NotFoundException("User not found");
+            }
+            if (record.emailVerifiedAt) {
+                  return { ok: true, message: "Email already verified" };
+            }
+
+            // Invalidate unused verification tokens so only the new link works
+            await this.prisma.authToken.updateMany({
+                  where: {
+                        userId,
+                        type: AuthTokenType.email_verification,
+                        usedAt: null,
+                  },
+                  data: { usedAt: new Date() },
+            });
+
+            const rawToken = randomBytes(48).toString("base64url");
+            const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+
+            await this.prisma.authToken.create({
+                  data: {
+                        userId,
+                        type: AuthTokenType.email_verification,
+                        tokenHash,
+                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                  },
+            });
+
+            await this.mailService.sendVerificationEmail({
+                  to: record.email,
+                  token: rawToken,
+            });
+
+            return { ok: true };
       }
 
       async refresh(rawToken: string) {
