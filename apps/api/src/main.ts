@@ -16,7 +16,7 @@ async function bootstrap() {
             .map((o) => o.trim())
             .filter(Boolean);
 
-      app.setGlobalPrefix("api/v1");
+      app.setGlobalPrefix("api/v1", { exclude: ["graphql"] });
 
       app.useGlobalPipes(
             new ValidationPipe({

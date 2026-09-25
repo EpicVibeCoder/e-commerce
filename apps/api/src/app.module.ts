@@ -12,13 +12,21 @@ import { RedisModule } from "./redis/redis.module";
 import { CategoriesModule } from "./categories/categories.module";
 import { ProductsModule } from "./products/products.module";
 import { MailModule } from "./mail/mail.module";
-
+import { GraphQLModule } from "@nestjs/graphql";
+import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
+import { HealthResolver } from "./graphql/health.resolver";
 @Module({
       imports: [
             ConfigModule.forRoot({
                   isGlobal: true,
                   envFilePath: [join(process.cwd(), "../../.env")],
                   validate: validateEnv,
+            }),
+            GraphQLModule.forRoot<ApolloDriverConfig>({
+                  driver: ApolloDriver,
+                  autoSchemaFile: join(process.cwd(), "src/schema.gql"),
+                  sortSchema: true,
+                  path: "/graphql",
             }),
             PrismaModule,
             AuthModule,
@@ -30,6 +38,6 @@ import { MailModule } from "./mail/mail.module";
             MailModule,
       ],
       controllers: [AppController],
-      providers: [AppService],
+      providers: [AppService, HealthResolver],
 })
 export class AppModule {}
