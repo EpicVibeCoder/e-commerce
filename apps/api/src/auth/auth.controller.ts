@@ -5,7 +5,7 @@ import { LoginDto } from "./dto/login.dto";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { RefreshDto } from "./dto/refresh.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
-import { CurrentUser } from "./decorators/current-user.decorator";  
+import { CurrentUser } from "./decorators/current-user.decorator";
 import type { JwtPayload } from "./types/jwt-payload";
 
 @ApiTags("Auth")

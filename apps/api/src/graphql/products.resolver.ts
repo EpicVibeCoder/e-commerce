@@ -2,7 +2,7 @@ import { Args, ID, Query, Resolver } from "@nestjs/graphql";
 import { NotFoundException } from "@nestjs/common";
 import { ProductsService } from "src/products/products.service";
 import { ProductType } from "./types/product.type";
-import { ProductConnection,ProductFilterInput,PaginationInput } from "./types/product-connection.type";
+import { ProductConnection, ProductFilterInput, PaginationInput } from "./types/product-connection.type";
 
 @Resolver(() => ProductType)
 export class ProductsResolver {

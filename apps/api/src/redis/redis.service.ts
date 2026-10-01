@@ -7,6 +7,7 @@ import type { EnvironmentVariables } from "src/config/env.validation";
 export class RedisService implements OnModuleInit, OnModuleDestroy {
       private readonly logger = new Logger(RedisService.name);
       private client!: Redis;
+      private ready = false;
 
       constructor(private readonly config: ConfigService<EnvironmentVariables, true>) {}
 
@@ -19,15 +20,30 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
             this.client = new Redis(url, {
                   maxRetriesPerRequest: 3,
                   lazyConnect: true,
-                  retryStrategy: () => null,
+                  retryStrategy: (times) => {
+                        if (times > 20) return null; // stop reconnecting
+                        return Math.min(times * 200, 5_000);
+                  },
             });
 
+            this.client.on("ready", () => {
+                  this.ready = true;
+                  this.logger.log("Redis connected");
+            });
+            this.client.on("close", () => {
+                  this.ready = false;
+                  this.logger.warn("Redis connection closed; cache disabled until reconnect check your redis connection");
+            });
             this.client.on("error", (err) => {
-                  this.logger.error(`Redis client error: ${err.message}`);
+                  this.logger.warn(`Redis: ${err.message}`); // warn, not fatal error spam
             });
 
-            await this.client.connect();
-            this.logger.log("Redis connected");
+            try {
+                  await this.client.connect();
+            } catch (err) {
+                  this.ready = false;
+                  this.logger.warn(`Redis unavailable at startup; continuing without cache (${err instanceof Error ? err.message : err})`);
+            }
       }
 
       async onModuleDestroy(): Promise<void> {
