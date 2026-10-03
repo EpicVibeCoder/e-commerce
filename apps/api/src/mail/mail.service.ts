@@ -7,7 +7,6 @@ export class MailService {
       async sendVerificationEmail(params: { to: string; token: string }): Promise<void> {
             // Stub until Phase 5 (Resend / Mailpit)
             this.logger.log(`Verification email stub → to=${params.to} token=${params.token}`);
-              return Promise.resolve();
-
+            return Promise.resolve();
       }
 }

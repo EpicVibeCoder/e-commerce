@@ -35,6 +35,9 @@
             "format": "prettier --write .",
             "prepare": "husky"
       },
+      "lint-staged": {
+            "*": "prettier --write --ignore-unknown"
+      },
       "devDependencies": {
             "dotenv-cli": "^11.0.0",
             "husky": "^9.1.7",
