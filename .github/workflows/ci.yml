@@ -46,7 +46,7 @@ jobs:
                           cache-dependency-path: apps/api/package-lock.json
                   - run: cp .env.example .env
                     working-directory: .
-                  - run: npm ci
+                  - run: npm ci --ignore-scripts
                   - run: npm run db:generate
                   - run: npm run db:migrate:deploy
                   - run: npm run lint:ci
@@ -70,7 +70,7 @@ jobs:
                           node-version: "24"
                           cache: npm
                           cache-dependency-path: apps/storefront/package-lock.json
-                  - run: npm ci
+                  - run: npm ci --ignore-scripts
                   - run: npm run lint
                   - run: npm run check-types
                   - run: npm run build
@@ -91,7 +91,7 @@ jobs:
                           node-version: "24"
                           cache: npm
                           cache-dependency-path: apps/admin/package-lock.json
-                  - run: npm ci
+                  - run: npm ci --ignore-scripts
                   - run: npm run lint
                   - run: npm run check-types
                   - run: npm run build
