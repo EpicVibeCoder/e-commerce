@@ -4,10 +4,12 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { AppEnv, type EnvironmentVariables } from "src/config/env.validation";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { PrismaExceptionFilter } from "./common/filters/prisma-exception.filter";
 
 async function bootstrap() {
       const app = await NestFactory.create(AppModule);
       const config = app.get(ConfigService<EnvironmentVariables, true>);
+
       const port = config.get("PORT", { infer: true });
       const appEnv = config.get("APP_ENV", { infer: true });
       const corsOrigins = config
@@ -17,6 +19,7 @@ async function bootstrap() {
             .filter(Boolean);
 
       app.setGlobalPrefix("api/v1", { exclude: ["graphql"] });
+      app.useGlobalFilters(new PrismaExceptionFilter());
 
       app.useGlobalPipes(
             new ValidationPipe({
