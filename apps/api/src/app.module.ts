@@ -16,6 +16,7 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { HealthResolver } from "./graphql/health.resolver";
 import { ProductsResolver } from "./graphql/products.resolver";
+import { CategoriesResolver } from "./graphql/categories.resolver";
 @Module({
       imports: [
             ConfigModule.forRoot({
@@ -39,6 +40,6 @@ import { ProductsResolver } from "./graphql/products.resolver";
             MailModule,
       ],
       controllers: [AppController],
-      providers: [AppService, HealthResolver, ProductsResolver],
+      providers: [AppService, HealthResolver, ProductsResolver, CategoriesResolver],
 })
 export class AppModule {}

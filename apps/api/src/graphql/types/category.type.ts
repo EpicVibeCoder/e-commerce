@@ -1,17 +1,29 @@
-import { Field, ID, ObjectType } from "@nestjs/graphql";
-import { IsString } from "class-validator";
+import { Field, ID, Int, ObjectType } from "@nestjs/graphql";
 
 @ObjectType()
 export class CategoryType {
       @Field(() => ID)
-      @IsString()
       id!: string;
 
       @Field()
-      @IsString()
       name!: string;
 
       @Field()
-      @IsString()
       slug!: string;
+
+      // tree-only fields (optional so Product.category still works)
+      @Field(() => ID, { nullable: true })
+      parentId?: string | null;
+
+      @Field(() => Int, { nullable: true })
+      sortOrder?: number;
+
+      @Field(() => Int, { nullable: true })
+      productCount?: number;
+
+      @Field(() => Int, { nullable: true })
+      childCount?: number;
+
+      @Field(() => [CategoryType], { nullable: true })
+      children?: CategoryType[];
 }
