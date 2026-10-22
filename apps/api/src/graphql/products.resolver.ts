@@ -1,4 +1,4 @@
-import { Args, ID, Query, Resolver } from "@nestjs/graphql";
+import { Args, ID, Query, Resolver, Int } from "@nestjs/graphql";
 import { NotFoundException } from "@nestjs/common";
 import { ProductsService } from "src/products/products.service";
 import { ProductType } from "./types/product.type";
@@ -26,5 +26,10 @@ export class ProductsResolver {
                   page: pagination?.page,
                   limit: pagination?.limit,
             });
+      }
+
+      @Query(() => [ProductType], { name: "recommendations" })
+      async recommendations(@Args("productId", { type: () => ID }) productId: string, @Args("limit", { type: () => Int, nullable: true, defaultValue: 8 }) limit?: number): Promise<ProductType[]> {
+            return this.productsService.recommendations(productId, limit ?? 8);
       }
 }
