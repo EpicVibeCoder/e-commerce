@@ -17,6 +17,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { HealthResolver } from "./graphql/health.resolver";
 import { ProductsResolver } from "./graphql/products.resolver";
 import { CategoriesResolver } from "./graphql/categories.resolver";
+import { LoadersModule } from "./graphql/loaders/loaders.module";
 @Module({
       imports: [
             ConfigModule.forRoot({
@@ -31,6 +32,7 @@ import { CategoriesResolver } from "./graphql/categories.resolver";
                   path: "/graphql",
             }),
             PrismaModule,
+            LoadersModule,
             AuthModule,
             UsersModule,
             HealthModule,
