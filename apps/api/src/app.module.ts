@@ -18,6 +18,7 @@ import { HealthResolver } from "./graphql/health.resolver";
 import { ProductsResolver } from "./graphql/products.resolver";
 import { CategoriesResolver } from "./graphql/categories.resolver";
 import { LoadersModule } from "./graphql/loaders/loaders.module";
+import { OrdersModule } from "./orders/orders.module";
 @Module({
       imports: [
             ConfigModule.forRoot({
@@ -40,6 +41,7 @@ import { LoadersModule } from "./graphql/loaders/loaders.module";
             CategoriesModule,
             ProductsModule,
             MailModule,
+            OrdersModule,
       ],
       controllers: [AppController],
       providers: [AppService, HealthResolver, ProductsResolver, CategoriesResolver],
