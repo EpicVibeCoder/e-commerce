@@ -5,6 +5,7 @@ import { AppModule } from "./app.module";
 import { AppEnv, type EnvironmentVariables } from "src/config/env.validation";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { PrismaExceptionFilter } from "./common/filters/prisma-exception.filter";
+import { HttpAdapterHost } from "@nestjs/core";
 
 async function bootstrap() {
       const app = await NestFactory.create(AppModule);
@@ -17,9 +18,10 @@ async function bootstrap() {
             .split(",")
             .map((o) => o.trim())
             .filter(Boolean);
+      const httpAdapterHost = app.get(HttpAdapterHost);
 
       app.setGlobalPrefix("api/v1", { exclude: ["graphql"] });
-      app.useGlobalFilters(new PrismaExceptionFilter());
+      app.useGlobalFilters(new PrismaExceptionFilter(httpAdapterHost));
 
       app.useGlobalPipes(
             new ValidationPipe({

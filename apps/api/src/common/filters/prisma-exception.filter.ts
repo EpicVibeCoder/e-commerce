@@ -1,10 +1,15 @@
-import { Catch, ExceptionFilter, ArgumentsHost, HttpStatus, Logger } from "@nestjs/common";
+import { Catch, ArgumentsHost, HttpStatus, Logger } from "@nestjs/common";
 import { Prisma } from "src/generated/prisma/client"; // adjust if your client export differs
 import type { Response } from "express";
+import { BaseExceptionFilter, HttpAdapterHost } from "@nestjs/core";
 
 @Catch()
-export class PrismaExceptionFilter implements ExceptionFilter {
+export class PrismaExceptionFilter extends BaseExceptionFilter {
       private readonly logger = new Logger(PrismaExceptionFilter.name);
+
+      constructor(adapterHost: HttpAdapterHost) {
+            super(adapterHost.httpAdapter);
+      }
 
       catch(exception: unknown, host: ArgumentsHost) {
             const ctx = host.switchToHttp();
@@ -25,7 +30,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
             }
 
             // Let Nest handle everything else (or rethrow)
-            throw exception;
+            super.catch(exception, host);
       }
 
       private isDbUnreachable(exception: unknown): boolean {
