@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "src/generated/prisma/client";
 import { OrderStatus, ProductStatus } from "src/generated/prisma/enums";
 import { Order } from "src/domain/order";
@@ -75,6 +75,52 @@ export class OrdersService {
 
                   return this.toResponse(order);
             });
+      }
+
+      async findOne(userId: string, orderId: string) {
+            const order = await this.prisma.order.findUnique({
+                  where: { id: orderId },
+                  include: { items: true },
+            });
+            if (!order) {
+                  throw new NotFoundException("Order not found");
+            }
+            if (order.userId !== userId) {
+                  throw new ForbiddenException("You do not have access to this order");
+            }
+            return this.toResponse(order);
+      }
+
+      async cancel(userId: string, orderId: string) {
+            const order = await this.prisma.order.findUnique({
+                  where: { id: orderId },
+                  include: { items: true },
+            });
+            if (!order) {
+                  throw new NotFoundException("Order not found");
+            }
+            if (order.userId !== userId) {
+                  throw new ForbiddenException("You do not have access to this order");
+            }
+            const domainOrder = Order.fromPersistence({
+                  id: order.id,
+                  userId: order.userId,
+                  status: order.status,
+                  totalAmount: order.totalAmount.toString(),
+            });
+            let cancelled: Order;
+            try {
+                  cancelled = domainOrder.transitionTo(OrderStatus.cancelled);
+            } catch (err) {
+                  if (err instanceof DomainError) throw new BadRequestException(err.message);
+                  throw err;
+            }
+            const updated = await this.prisma.order.update({
+                  where: { id: orderId },
+                  data: { status: cancelled.status },
+                  include: { items: true },
+            });
+            return this.toResponse(updated);
       }
 
       private toResponse(order: {
