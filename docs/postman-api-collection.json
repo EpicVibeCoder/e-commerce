@@ -36,6 +36,18 @@
             {
                   "key": "verificationToken",
                   "value": ""
+            },
+            {
+                  "key": "unverifiedAccessToken",
+                  "value": ""
+            },
+            {
+                  "key": "orderId",
+                  "value": ""
+            },
+            {
+                  "key": "orderProductId",
+                  "value": ""
             }
       ],
       "item": [
@@ -134,6 +146,7 @@
                                                       "    pm.expect(jsonData.user.email).to.eql(pm.collectionVariables.get(\"registerEmail\"));",
                                                       "    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
                                                       "    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+                                                      "    pm.collectionVariables.set(\"unverifiedAccessToken\", jsonData.accessToken);",
                                                       "});"
                                                 ],
                                                 "type": "text/javascript"
@@ -356,6 +369,64 @@
                                           ]
                                     },
                                     "description": "Verifies user email using the token received in the verification email."
+                              }
+                        },
+                        {
+                              "name": "Resend Verification Email",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Resend verification response is valid\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.ok).to.eql(true);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/resend-verification",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "resend-verification"]
+                                    },
+                                    "description": "Resends the email verification link to the current authenticated user's registered email."
+                              }
+                        },
+                        {
+                              "name": "Resend Verification - Unauthorized",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 401\", function () {", "    pm.response.to.have.status(401);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/auth/resend-verification",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "auth", "resend-verification"]
+                                    },
+                                    "description": "Attempts to resend verification email without JWT token, expecting 401 Unauthorized."
                               }
                         },
                         {
@@ -1632,6 +1703,10 @@
                                                       "    if (jsonData.data.length > 0 && !pm.collectionVariables.get(\"productId\")) {",
                                                       "        pm.collectionVariables.set(\"productId\", jsonData.data[0].id);",
                                                       "    }",
+                                                      "    var activeItem = jsonData.data.find(function (p) { return p.status === 'active'; });",
+                                                      "    if (activeItem && !pm.collectionVariables.get(\"orderProductId\")) {",
+                                                      "        pm.collectionVariables.set(\"orderProductId\", activeItem.id);",
+                                                      "    }",
                                                       "});"
                                                 ],
                                                 "type": "text/javascript"
@@ -1975,6 +2050,311 @@
                                           "path": ["api", "v1", "categories", "{{categoryId}}"]
                                     },
                                     "description": "Deletes the main test category now that attached products have been deleted (admin required)."
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Orders",
+                  "item": [
+                        {
+                              "name": "Create Order",
+                              "event": [
+                                    {
+                                          "listen": "prerequest",
+                                          "script": {
+                                                "exec": [
+                                                      "if (!pm.collectionVariables.get(\"orderProductId\")) {",
+                                                      "    const baseUrl = pm.collectionVariables.get(\"baseUrl\") || \"http://localhost:3000\";",
+                                                      "    const adminToken = pm.collectionVariables.get(\"adminAccessToken\");",
+                                                      "    pm.sendRequest({",
+                                                      "        url: baseUrl + \"/api/v1/products?status=active&limit=1\",",
+                                                      "        method: \"GET\",",
+                                                      "        header: {",
+                                                      "            \"Authorization\": \"Bearer \" + adminToken",
+                                                      "        }",
+                                                      "    }, function (err, res) {",
+                                                      "        if (!err && res.code === 200) {",
+                                                      "            const data = res.json();",
+                                                      "            if (data.data && data.data.length > 0) {",
+                                                      "                pm.collectionVariables.set(\"orderProductId\", data.data[0].id);",
+                                                      "            }",
+                                                      "        }",
+                                                      "    });",
+                                                      "}"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    },
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Response contains created order details\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"id\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"userId\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"status\");",
+                                                      "    pm.expect(jsonData.status).to.eql(\"pending\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"totalAmount\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"items\");",
+                                                      "    pm.expect(jsonData.items).to.be.an(\"array\");",
+                                                      "    pm.expect(jsonData.items.length).to.be.above(0);",
+                                                      "    pm.expect(jsonData.items[0]).to.have.property(\"productId\");",
+                                                      "    pm.expect(jsonData.items[0]).to.have.property(\"quantity\");",
+                                                      "    pm.expect(jsonData.items[0]).to.have.property(\"price\");",
+                                                      "    pm.expect(jsonData.items[0]).to.have.property(\"subtotal\");",
+                                                      "    pm.collectionVariables.set(\"orderId\", jsonData.id);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{orderProductId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders"]
+                                    },
+                                    "description": "Creates a new order with items for the authenticated user with verified email."
+                              }
+                        },
+                        {
+                              "name": "Create Order Error - Unauthorized",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 401\", function () {", "    pm.response.to.have.status(401);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{orderProductId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders"]
+                                    },
+                                    "description": "Attempts to create an order without JWT authentication token, expecting 401 Unauthorized."
+                              }
+                        },
+                        {
+                              "name": "Create Order Error - Email Verification Required",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 403\", function () {", "    pm.response.to.have.status(403);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{unverifiedAccessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{orderProductId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders"]
+                                    },
+                                    "description": "Attempts to create an order with an authenticated user whose email has not been verified, expecting 403 Forbidden."
+                              }
+                        },
+                        {
+                              "name": "Create Order Error - Empty Items",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 400\", function () {", "    pm.response.to.have.status(400);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"items\": []\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders"]
+                                    },
+                                    "description": "Attempts to create an order with an empty items array, expecting 400 Bad Request error."
+                              }
+                        },
+                        {
+                              "name": "Create Order Error - Invalid Quantity",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 400\", function () {", "    pm.response.to.have.status(400);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{orderProductId}}\",\n      \"quantity\": 0\n    }\n  ]\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders"]
+                                    },
+                                    "description": "Attempts to create an order with non-positive item quantity, expecting 400 Bad Request error."
+                              }
+                        },
+                        {
+                              "name": "Create Order Error - Product Not Found",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 404\", function () {", "    pm.response.to.have.status(404);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"nonexistent-product-id\",\n      \"quantity\": 1\n    }\n  ]\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders"]
+                                    },
+                                    "description": "Attempts to create an order with a non-existent product ID, expecting 404 Not Found error."
+                              }
+                        },
+                        {
+                              "name": "Create Order Error - Insufficient Stock",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 400\", function () {", "    pm.response.to.have.status(400);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{orderProductId}}\",\n      \"quantity\": 999999\n    }\n  ]\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders"]
+                                    },
+                                    "description": "Attempts to create an order requesting more stock than available, expecting 400 Bad Request error."
                               }
                         }
                   ]
