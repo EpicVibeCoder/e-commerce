@@ -31,7 +31,7 @@ export class UsersService {
             const orders = await this.prisma.order.findMany({
                   where: { userId },
                   orderBy: { createdAt: "desc" },
-                  include: { items: true },
+                  include: { items: { include: { product: true } } },
             });
 
             return orders.map((order) => ({
@@ -45,6 +45,14 @@ export class UsersService {
                         quantity: item.quantity,
                         price: item.price.toString(),
                         subtotal: item.subtotal.toString(),
+                        product: item.product
+                              ? {
+                                      id: item.product.id,
+                                      name: item.product.name,
+                                      sku: item.product.sku,
+                                      price: item.product.price.toString(),
+                                }
+                              : null,
                   })),
             }));
       }
