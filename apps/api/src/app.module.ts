@@ -19,6 +19,7 @@ import { ProductsResolver } from "./graphql/products.resolver";
 import { CategoriesResolver } from "./graphql/categories.resolver";
 import { LoadersModule } from "./graphql/loaders/loaders.module";
 import { OrdersModule } from "./orders/orders.module";
+import { OrdersResolver } from "./graphql/orders.resolver";
 @Module({
       imports: [
             ConfigModule.forRoot({
@@ -31,6 +32,7 @@ import { OrdersModule } from "./orders/orders.module";
                   autoSchemaFile: join(process.cwd(), "src/schema.gql"),
                   sortSchema: true,
                   path: "/graphql",
+                  context: ({ req }) => ({ req }),
             }),
             PrismaModule,
             LoadersModule,
@@ -44,6 +46,6 @@ import { OrdersModule } from "./orders/orders.module";
             OrdersModule,
       ],
       controllers: [AppController],
-      providers: [AppService, HealthResolver, ProductsResolver, CategoriesResolver],
+      providers: [AppService, HealthResolver, ProductsResolver, CategoriesResolver, OrdersResolver],
 })
 export class AppModule {}
