@@ -70,6 +70,13 @@ async function bootstrap() {
 
       await app.listen(port);
 
-      console.log(`\n🚀 API is live — ready for requests\n` + `🌍 env:  ${appEnv}\n` + `🔌 port: ${port}\n` + `🔗 url:  http://localhost:${port}/api/v1\n` + (appEnv !== AppEnv.production ? `📚 docs: http://localhost:${port}/api/docs\n` : ""));
+      console.log(
+            `\n🚀 API is live — ready for requests\n` +
+                  `🌍 env:  ${appEnv}\n` +
+                  `🔌 port: ${port}\n` +
+                  `🔗 url:  http://localhost:${port}/api/v1\n` +
+                  `⬡ gql:  http://localhost:${port}/graphql\n` +
+                  (appEnv !== AppEnv.production ? `📚 docs: http://localhost:${port}/api/docs\n` : ""),
+      );
 }
 void bootstrap();
