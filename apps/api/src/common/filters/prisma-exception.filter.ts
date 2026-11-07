@@ -1,4 +1,4 @@
-import { Catch, ArgumentsHost, HttpStatus, Logger } from "@nestjs/common";
+import { Catch, ArgumentsHost, HttpStatus, Logger, HttpException } from "@nestjs/common";
 import { Prisma } from "src/generated/prisma/client"; // adjust if your client export differs
 import type { Response } from "express";
 import { BaseExceptionFilter, HttpAdapterHost } from "@nestjs/core";
@@ -14,6 +14,16 @@ export class PrismaExceptionFilter extends BaseExceptionFilter {
       catch(exception: unknown, host: ArgumentsHost) {
             const ctx = host.switchToHttp();
             const res = ctx.getResponse<Response>();
+
+            if (host.getType<"graphql">() === "graphql") {
+                  if (this.isDbUnreachable(exception)) {
+                        throw new HttpException({ status: "not_ready", database: "down" }, HttpStatus.SERVICE_UNAVAILABLE);
+                  }
+                  if (this.isRedisUnreachable(exception)) {
+                        throw new HttpException({ status: "not_ready", redis: "down" }, HttpStatus.SERVICE_UNAVAILABLE);
+                  }
+                  throw exception; // let Apollo format Unauthorized / etc.
+            }
 
             if (this.isDbUnreachable(exception)) {
                   this.logger.error("Database not reachable", exception instanceof Error ? exception.message : String(exception));
