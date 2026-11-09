@@ -20,6 +20,7 @@ import { CategoriesResolver } from "./graphql/categories.resolver";
 import { LoadersModule } from "./graphql/loaders/loaders.module";
 import { OrdersModule } from "./orders/orders.module";
 import { OrdersResolver } from "./graphql/orders.resolver";
+import { PaymentsModule } from "./payments/payments.module";
 @Module({
       imports: [
             ConfigModule.forRoot({
@@ -44,6 +45,7 @@ import { OrdersResolver } from "./graphql/orders.resolver";
             ProductsModule,
             MailModule,
             OrdersModule,
+            PaymentsModule,
       ],
       controllers: [AppController],
       providers: [AppService, HealthResolver, ProductsResolver, CategoriesResolver, OrdersResolver],
