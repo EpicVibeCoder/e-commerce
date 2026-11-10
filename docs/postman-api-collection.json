@@ -52,6 +52,22 @@
             {
                   "key": "gqlProductId",
                   "value": ""
+            },
+            {
+                  "key": "tempDeleteCategoryId",
+                  "value": ""
+            },
+            {
+                  "key": "tempCancelOrderId",
+                  "value": ""
+            },
+            {
+                  "key": "stripeTransactionId",
+                  "value": ""
+            },
+            {
+                  "key": "sslTransactionId",
+                  "value": ""
             }
       ],
       "item": [
@@ -1032,6 +1048,86 @@
                                           "path": ["api", "v1", "users", "me", "payments"]
                                     },
                                     "description": "Gets current user's payment records."
+                              }
+                        },
+                        {
+                              "name": "Get Current User Orders - Unauthorized",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 401\", function () {", "    pm.response.to.have.status(401);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/users/me/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "users", "me", "orders"]
+                                    },
+                                    "description": "Attempts to get user orders without JWT authentication token, expecting 401 Unauthorized."
+                              }
+                        },
+                        {
+                              "name": "Get Current User Orders - Email Verification Required",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 403\", function () {",
+                                                      "    pm.response.to.have.status(403);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates email verification required\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.include(\"Email verification required\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{unverifiedAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/users/me/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "users", "me", "orders"]
+                                    },
+                                    "description": "Attempts to get user orders with an unverified user account, expecting 403 Forbidden error."
+                              }
+                        },
+                        {
+                              "name": "Get Current User Payments - Unauthorized",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 401\", function () {", "    pm.response.to.have.status(401);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/users/me/payments",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "users", "me", "payments"]
+                                    },
+                                    "description": "Attempts to get user payments without JWT authentication token, expecting 401 Unauthorized."
                               }
                         }
                   ]
@@ -2359,6 +2455,830 @@
                                           "path": ["api", "v1", "orders"]
                                     },
                                     "description": "Attempts to create an order requesting more stock than available, expecting 400 Bad Request error."
+                              }
+                        },
+                        {
+                              "name": "Get Order by ID",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Response contains order details\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"id\");",
+                                                      "    if (pm.collectionVariables.get(\"orderId\")) {",
+                                                      "        pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"orderId\"));",
+                                                      "    }",
+                                                      "    pm.expect(jsonData).to.have.property(\"userId\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"status\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"totalAmount\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"items\");",
+                                                      "    pm.expect(jsonData.items).to.be.an(\"array\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"createdAt\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"updatedAt\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders", "{{orderId}}"]
+                                    },
+                                    "description": "Gets order details by ID for the authenticated user with verified email."
+                              }
+                        },
+                        {
+                              "name": "Get Order Error - Unauthorized",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 401\", function () {", "    pm.response.to.have.status(401);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders", "{{orderId}}"]
+                                    },
+                                    "description": "Attempts to get order details without JWT authentication token, expecting 401 Unauthorized."
+                              }
+                        },
+                        {
+                              "name": "Get Order Error - Email Verification Required",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 403\", function () {",
+                                                      "    pm.response.to.have.status(403);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates email verification required\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.include(\"Email verification required\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{unverifiedAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders", "{{orderId}}"]
+                                    },
+                                    "description": "Attempts to get order details with an unverified user account, expecting 403 Forbidden error."
+                              }
+                        },
+                        {
+                              "name": "Get Order Error - Not Found",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 404\", function () {",
+                                                      "    pm.response.to.have.status(404);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates order not found\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.include(\"Order not found\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "GET",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders/nonexistent-order-id",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders", "nonexistent-order-id"]
+                                    },
+                                    "description": "Attempts to get a non-existent order by ID, expecting 404 Not Found error."
+                              }
+                        },
+                        {
+                              "name": "Create Order for Cancellation",
+                              "event": [
+                                    {
+                                          "listen": "prerequest",
+                                          "script": {
+                                                "exec": [
+                                                      "if (!pm.collectionVariables.get(\"orderProductId\")) {",
+                                                      "    const baseUrl = pm.collectionVariables.get(\"baseUrl\") || \"http://localhost:3000\";",
+                                                      "    const adminToken = pm.collectionVariables.get(\"adminAccessToken\");",
+                                                      "    pm.sendRequest({",
+                                                      "        url: baseUrl + \"/api/v1/products?status=active&limit=1\",",
+                                                      "        method: \"GET\",",
+                                                      "        header: {",
+                                                      "            \"Authorization\": \"Bearer \" + adminToken",
+                                                      "        }",
+                                                      "    }, function (err, res) {",
+                                                      "        if (!err && res.code === 200) {",
+                                                      "            const data = res.json();",
+                                                      "            if (data.data && data.data.length > 0) {",
+                                                      "                pm.collectionVariables.set(\"orderProductId\", data.data[0].id);",
+                                                      "            }",
+                                                      "        }",
+                                                      "    });",
+                                                      "}"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    },
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Creates temporary order for cancel testing\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"id\");",
+                                                      "    pm.expect(jsonData.status).to.eql(\"pending\");",
+                                                      "    pm.collectionVariables.set(\"tempCancelOrderId\", jsonData.id);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{orderProductId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders"]
+                                    },
+                                    "description": "Creates a dedicated order to test order cancellation workflow."
+                              }
+                        },
+                        {
+                              "name": "Cancel Order",
+                              "event": [
+                                    {
+                                          "listen": "prerequest",
+                                          "script": {
+                                                "exec": [
+                                                      "if (!pm.collectionVariables.get(\"tempCancelOrderId\")) {",
+                                                      "    const orderId = pm.collectionVariables.get(\"orderId\");",
+                                                      "    if (orderId) {",
+                                                      "        pm.collectionVariables.set(\"tempCancelOrderId\", orderId);",
+                                                      "    }",
+                                                      "}"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    },
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 200\", function () {",
+                                                      "    pm.response.to.have.status(200);",
+                                                      "});",
+                                                      "pm.test(\"Order is cancelled successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"id\");",
+                                                      "    if (pm.collectionVariables.get(\"tempCancelOrderId\")) {",
+                                                      "        pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"tempCancelOrderId\"));",
+                                                      "    }",
+                                                      "    pm.expect(jsonData.status).to.eql(\"cancelled\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "PATCH",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders/{{tempCancelOrderId}}/cancel",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders", "{{tempCancelOrderId}}", "cancel"]
+                                    },
+                                    "description": "Cancels an order by ID for the authenticated user with verified email."
+                              }
+                        },
+                        {
+                              "name": "Cancel Order Error - Already Cancelled",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 400\", function () {",
+                                                      "    pm.response.to.have.status(400);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates invalid status transition\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.include(\"Cannot transition order from cancelled to cancelled\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "PATCH",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders/{{tempCancelOrderId}}/cancel",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders", "{{tempCancelOrderId}}", "cancel"]
+                                    },
+                                    "description": "Attempts to cancel an already cancelled order, expecting 400 Bad Request error."
+                              }
+                        },
+                        {
+                              "name": "Cancel Order Error - Unauthorized",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 401\", function () {", "    pm.response.to.have.status(401);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "PATCH",
+                                    "header": [],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders/{{tempCancelOrderId}}/cancel",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders", "{{tempCancelOrderId}}", "cancel"]
+                                    },
+                                    "description": "Attempts to cancel an order without JWT authentication token, expecting 401 Unauthorized."
+                              }
+                        },
+                        {
+                              "name": "Cancel Order Error - Email Verification Required",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 403\", function () {",
+                                                      "    pm.response.to.have.status(403);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates email verification required\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.include(\"Email verification required\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "PATCH",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{unverifiedAccessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders/{{tempCancelOrderId}}/cancel",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders", "{{tempCancelOrderId}}", "cancel"]
+                                    },
+                                    "description": "Attempts to cancel an order with an unverified user account, expecting 403 Forbidden error."
+                              }
+                        },
+                        {
+                              "name": "Cancel Order Error - Not Found",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 404\", function () {",
+                                                      "    pm.response.to.have.status(404);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates order not found\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.include(\"Order not found\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "PATCH",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/orders/nonexistent-order-id/cancel",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "orders", "nonexistent-order-id", "cancel"]
+                                    },
+                                    "description": "Attempts to cancel a non-existent order, expecting 404 Not Found error."
+                              }
+                        }
+                  ]
+            },
+            {
+                  "name": "Payments",
+                  "item": [
+                        {
+                              "name": "Checkout - Stripe",
+                              "event": [
+                                    {
+                                          "listen": "prerequest",
+                                          "script": {
+                                                "exec": ["if (!pm.collectionVariables.get(\"orderId\")) {", "    pm.collectionVariables.set(\"orderId\", \"demo-order-id-123\");", "}"],
+                                                "type": "text/javascript"
+                                          }
+                                    },
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Returns Stripe checkout session details\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"provider\");",
+                                                      "    pm.expect(jsonData.provider).to.eql(\"stripe\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"transactionId\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"clientSecret\");",
+                                                      "    pm.collectionVariables.set(\"stripeTransactionId\", jsonData.transactionId);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"provider\": \"stripe\",\n  \"successUrl\": \"http://localhost:3002/checkout/success\",\n  \"cancelUrl\": \"http://localhost:3002/checkout/cancel\",\n  \"customerEmail\": \"demo@customer.com\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/payments/checkout",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "payments", "checkout"]
+                                    },
+                                    "description": "Initiates a checkout session using the Stripe provider for an order. Requires customer Bearer JWT and verified email."
+                              }
+                        },
+                        {
+                              "name": "Checkout - SSLCommerz",
+                              "event": [
+                                    {
+                                          "listen": "prerequest",
+                                          "script": {
+                                                "exec": ["if (!pm.collectionVariables.get(\"orderId\")) {", "    pm.collectionVariables.set(\"orderId\", \"demo-order-id-123\");", "}"],
+                                                "type": "text/javascript"
+                                          }
+                                    },
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Returns SSLCommerz checkout details\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"provider\");",
+                                                      "    pm.expect(jsonData.provider).to.eql(\"sslcommerz\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"transactionId\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"redirectUrl\");",
+                                                      "    pm.expect(jsonData.redirectUrl).to.eql(\"http://localhost:3002/checkout/success\");",
+                                                      "    pm.collectionVariables.set(\"sslTransactionId\", jsonData.transactionId);",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"provider\": \"sslcommerz\",\n  \"successUrl\": \"http://localhost:3002/checkout/success\",\n  \"cancelUrl\": \"http://localhost:3002/checkout/cancel\",\n  \"customerEmail\": \"demo@customer.com\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/payments/checkout",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "payments", "checkout"]
+                                    },
+                                    "description": "Initiates a checkout session using the SSLCommerz provider for an order. Requires customer Bearer JWT and verified email."
+                              }
+                        },
+                        {
+                              "name": "Checkout Error - Unauthorized",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": ["pm.test(\"Status code is 401\", function () {", "    pm.response.to.have.status(401);", "});"],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"provider\": \"stripe\",\n  \"successUrl\": \"http://localhost:3002/checkout/success\",\n  \"cancelUrl\": \"http://localhost:3002/checkout/cancel\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/payments/checkout",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "payments", "checkout"]
+                                    },
+                                    "description": "Attempts to initiate checkout without JWT authentication token, expecting 401 Unauthorized."
+                              }
+                        },
+                        {
+                              "name": "Checkout Error - Email Verification Required",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 403\", function () {",
+                                                      "    pm.response.to.have.status(403);",
+                                                      "});",
+                                                      "pm.test(\"Error message indicates email verification required\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.include(\"Email verification required\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{unverifiedAccessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"provider\": \"stripe\",\n  \"successUrl\": \"http://localhost:3002/checkout/success\",\n  \"cancelUrl\": \"http://localhost:3002/checkout/cancel\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/payments/checkout",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "payments", "checkout"]
+                                    },
+                                    "description": "Attempts to initiate checkout with an unverified user account, expecting 403 Forbidden error."
+                              }
+                        },
+                        {
+                              "name": "Checkout Error - Invalid Provider",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 400\", function () {",
+                                                      "    pm.response.to.have.status(400);",
+                                                      "});",
+                                                      "pm.test(\"Validation error returned for invalid provider\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.be.an(\"array\");",
+                                                      "    pm.expect(jsonData.message.some(function (m) { return m.includes(\"provider\"); })).to.be.true;",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"provider\": \"invalid_provider\",\n  \"successUrl\": \"http://localhost:3002/checkout/success\",\n  \"cancelUrl\": \"http://localhost:3002/checkout/cancel\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/payments/checkout",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "payments", "checkout"]
+                                    },
+                                    "description": "Attempts to initiate checkout with an unsupported payment provider, expecting 400 Bad Request error."
+                              }
+                        },
+                        {
+                              "name": "Checkout Error - Invalid URL Format",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 400\", function () {",
+                                                      "    pm.response.to.have.status(400);",
+                                                      "});",
+                                                      "pm.test(\"Validation error returned for invalid URL\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.be.an(\"array\");",
+                                                      "    pm.expect(jsonData.message.some(function (m) { return m.includes(\"successUrl\"); })).to.be.true;",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"provider\": \"stripe\",\n  \"successUrl\": \"not-a-valid-url\",\n  \"cancelUrl\": \"http://localhost:3002/checkout/cancel\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/payments/checkout",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "payments", "checkout"]
+                                    },
+                                    "description": "Attempts to initiate checkout with an invalid URL format, expecting 400 Bad Request error."
+                              }
+                        },
+                        {
+                              "name": "Checkout Error - Missing Required Fields",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 400\", function () {",
+                                                      "    pm.response.to.have.status(400);",
+                                                      "});",
+                                                      "pm.test(\"Validation error returned for missing required fields\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData.message).to.be.an(\"array\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{accessToken}}",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/payments/checkout",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "payments", "checkout"]
+                                    },
+                                    "description": "Attempts to initiate checkout with an empty payload, expecting 400 Bad Request error."
+                              }
+                        },
+                        {
+                              "name": "Stripe Webhook",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"Stripe webhook handled successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"provider\");",
+                                                      "    pm.expect(jsonData.provider).to.eql(\"stripe\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"status\");",
+                                                      "    pm.expect(jsonData.status).to.eql(\"succeeded\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"transactionId\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"orderId\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          },
+                                          {
+                                                "key": "stripe-signature",
+                                                "value": "t=1614555555,v1=test_signature",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"id\": \"evt_test_webhook\",\n  \"type\": \"payment_intent.succeeded\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"pi_test_123\",\n      \"status\": \"succeeded\"\n    }\n  }\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/payments/webhooks/stripe",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "payments", "webhooks", "stripe"]
+                                    },
+                                    "description": "Simulates incoming Stripe webhook event notification."
+                              }
+                        },
+                        {
+                              "name": "SSLCommerz Webhook",
+                              "event": [
+                                    {
+                                          "listen": "test",
+                                          "script": {
+                                                "exec": [
+                                                      "pm.test(\"Status code is 201\", function () {",
+                                                      "    pm.response.to.have.status(201);",
+                                                      "});",
+                                                      "pm.test(\"SSLCommerz webhook handled successfully\", function () {",
+                                                      "    var jsonData = pm.response.json();",
+                                                      "    pm.expect(jsonData).to.have.property(\"provider\");",
+                                                      "    pm.expect(jsonData.provider).to.eql(\"sslcommerz\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"status\");",
+                                                      "    pm.expect(jsonData.status).to.eql(\"succeeded\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"transactionId\");",
+                                                      "    pm.expect(jsonData).to.have.property(\"orderId\");",
+                                                      "});"
+                                                ],
+                                                "type": "text/javascript"
+                                          }
+                                    }
+                              ],
+                              "request": {
+                                    "method": "POST",
+                                    "header": [
+                                          {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                          }
+                                    ],
+                                    "body": {
+                                          "mode": "raw",
+                                          "raw": "{\n  \"tran_id\": \"ssl_stub_txn\",\n  \"val_id\": \"val_stub_123\",\n  \"status\": \"VALID\",\n  \"amount\": \"29.99\",\n  \"currency\": \"BDT\"\n}"
+                                    },
+                                    "url": {
+                                          "raw": "{{baseUrl}}/api/v1/payments/webhooks/sslcommerz",
+                                          "host": ["{{baseUrl}}"],
+                                          "path": ["api", "v1", "payments", "webhooks", "sslcommerz"]
+                                    },
+                                    "description": "Simulates incoming SSLCommerz IPN (Instant Payment Notification) webhook."
                               }
                         }
                   ]
