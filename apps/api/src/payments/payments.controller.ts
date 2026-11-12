@@ -21,7 +21,7 @@ export class PaymentsController {
       @ApiBearerAuth("access-token")
       @ApiOperation({ summary: "Start checkout for an order (email verified required)" })
       checkout(@CurrentUser() user: JwtPayload, @Body() dto: CheckoutDto) {
-            return this.paymentsService.initiate(dto.provider, { id: dto.orderId, userId: user.sub, totalAmount: "0", status: "pending" }, { successUrl: dto.successUrl, cancelUrl: dto.cancelUrl, customerEmail: dto.customerEmail });
+            return this.paymentsService.checkout(user.sub, dto);
       }
 
       @Post("webhooks/stripe")
